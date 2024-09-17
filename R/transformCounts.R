@@ -3,46 +3,39 @@
 #' Variety of transformations for abundance data, stored in \code{assay}.
 #' See details for options.
 #'
-#' @param x A
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
-#'    object.
-#'
-#' @param assay.type A single character value for selecting the
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assay}} to be
-#'   transformed.
-#'
-#' @param assay_name a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead. At some point \code{assay_name}
-#'   will be disabled.)
+#' @inheritParams getDominant
+#' @inheritParams getDissimilarity
 #'   
-#' @param method A single character value for selecting the transformation
+#' @param method \code{Character scalar}. Specifies the transformation
 #'   method.
 #' 
-#' @param MARGIN A single character value for specifying whether the
+#' @param MARGIN \code{Character scalar}. Determines whether the
 #'   transformation is applied sample (column) or feature (row) wise.
-#'   (By default: \code{MARGIN = "samples"})
-#'
-#' @param name A single character value specifying the name of transformed
-#'   abundance table.
+#'   (Default: \code{"samples"})
 #' 
-#' @param pseudocount TRUE, FALSE, or a numeric value. When TRUE,
-#'   automatically adds the minimum positive value of \code{assay.type}.
+#' @param pseudocount \code{Logical scalar} or \code{numeric scalar}. 
+#'   When \code{TRUE}, automatically adds half of the minimum positive 
+#'   value of \code{assay.type} (missing values ignored by default: 
+#'   \code{na.rm = TRUE}).
 #'   When FALSE, does not add any pseudocount (pseudocount = 0).
 #'   Alternatively, a user-specified numeric value can be added as pseudocount.
+#'   (Default: \code{FALSE}).
+#' 
+#' @param name \code{Character scalar}. A name for the column of the 
+#'   \code{colData} where results will be stored. (Default: \code{"method"})
 #'
 #' @param ... additional arguments passed on to \code{vegan:decostand}:
 #' \itemize{
-#'   \item{\code{ref_vals}:} {A single value which will be used to fill 
-#'   reference sample's column in returned assay when calculating alr. 
-#'   (default: \code{ref_vals = NA})}
+#'   \item \code{reference}: \code{Character scalar}. use to
+#'   to fill reference sample's column in returned assay when calculating alr. 
+#'   (Default: \code{NA})
+#'   \item \code{ref_vals} Deprecated. Use \code{reference} instead.
 #' }
 #' @details
 #'
-#' These \code{transformCount} function provides a variety of options for transforming abundance data.
-#' The transformed data is calculated and stored in a new \code{assay}. The previously available
-#' wrappers transformSamples, transformFeatures
-#' ZTransform, and relAbundanceCounts have been deprecated.
+#' \code{transformAssay} function provides a variety of options for
+#' transforming abundance data. The transformed data is calculated and stored
+#' in a new \code{assay}.
 #'
 #' The \code{transformAssay} provides sample-wise (column-wise) or feature-wise
 #' (row-wise) transformation to the abundance table
@@ -52,63 +45,21 @@
 #'
 #' \itemize{
 #' 
-#' \item{'alr'}{ Additive log ratio (alr) transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
+#' \item 'alr', 'chi.square', 'clr', 'frequency', 'hellinger', 'log', 'normalize', 'pa', 'rank', 'rclr'
+#' 'relabundance', 'rrank', 'standardize', 'total': please refer to 
+#' \code{\link[vegan:decostand]{decostand}} for details.
 #' 
-#' \item{'chi.square'}{ Chi square transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'clr'}{ Centered log ratio (clr) transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#'
-#' \item{'frequency'}{ Frequency transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'hellinger'}{ Hellinger transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'log'}{ Logarithmic transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'log10'}{ log10 transformation can be used for reducing the skewness
+#' \item 'log10': log10 transformation can be used for reducing the skewness
 #' of the data.
 #' \deqn{log10 = \log_{10} x}{%
 #' log10 = log10(x)}
-#' where \eqn{x} is a single value of data.}
+#' where \eqn{x} is a single value of data.
 #' 
-#' \item{'log2'}{ log2 transformation can be used for reducing the skewness of
+#' \item 'log2': log2 transformation can be used for reducing the skewness of
 #' the data.
 #' \deqn{log2 = \log_{2} x}{%
 #' log2 = log2(x)}
-#' where \eqn{x} is a single value of data.}
-#' 
-#' \item{'normalize'}{ Make margin sum of squares equal to one. Please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'pa'}{ Transforms table to presence/absence table. Please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#'
-#' \item{'rank'}{ Rank transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'rclr'}{ Robust clr transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'relabundance'}{ Relative transformation (alias for 'total'), please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'rrank'}{ Relative rank transformation, please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'standardize'}{ Scale 'x' to zero mean and unit variance (alias for
-#' 'z'), please refer to \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'total'}{ Divide by margin total (alias for
-#' 'relabundance'), please refer to 
-#' \code{\link[vegan:decostand]{decostand}} for details.}
-#' 
-#' \item{'z'}{ Z transformation (alias for 'standardize'),
-#' please refer to \code{\link[vegan:decostand]{decostand}} for details.}
+#' where \eqn{x} is a single value of data.
 #'
 #' }
 #'
@@ -118,8 +69,6 @@
 #'
 #' @name transformAssay
 #' @export
-#'
-#' @author Leo Lahti and Tuomas Borman. Contact: \url{microbiome.github.io}
 #'
 #' @examples
 #' data(esophagus, package="mia")
@@ -141,8 +90,8 @@
 #' 
 #' # With MARGIN, you can specify the if transformation is done for samples or
 #' # for features. Here Z-transformation is done feature-wise.
-#' tse <- transformAssay(tse, method = "z", MARGIN = "features")
-#' head(assay(tse, "z"))
+#' tse <- transformAssay(tse, method = "standardize", MARGIN = "features")
+#' head(assay(tse, "standardize"))
 #' 
 #' # Name of the stored table can be specified.
 #' tse <- transformAssay(tse, method="hellinger", name="test")
@@ -157,63 +106,12 @@
 #' head(assay(tse, "rank"))
 #'
 #' # In order to use other ranking variants, modify the chosen assay directly:
-#' assay(tse, "rank_average", withDimnames = FALSE) <- colRanks(assay(tse, "counts"), 
-#'                                                            ties.method="average", 
-#'                                                            preserveShape = TRUE)  
+#' assay(tse, "rank_average", withDimnames = FALSE) <- colRanks(
+#'     assay(tse, "counts"), ties.method = "average", preserveShape = TRUE)  
 #' 
 NULL
 
 #' @rdname transformAssay
-#' @aliases transformAssay
-#' @export
-setGeneric("transformSamples", signature = c("x"),
-           function(x,
-                    assay.type = "counts", assay_name = NULL,
-                    method = c("alr", "chi.square", "clr", "frequency", "hellinger",
-                               "log", "log10", "log2", "normalize", "pa",
-                               "rank", "rclr", "relabundance", "rrank",
-                               "total"),
-                    name = method,
-                    ...
-                    )
-                    standardGeneric("transformSamples"))
-
-#' @rdname transformAssay
-#' @aliases transformAssay
-#' @export
-setMethod("transformSamples", signature = c(x = "SummarizedExperiment"),
-    function(x,
-            assay.type = "counts", assay_name = NULL,
-            method =  c("alr", "chi.square", "clr", "frequency", "hellinger",
-                        "log", "log10", "log2", "normalize", "pa",
-                        "rank", "rclr", "relabundance", "rrank",
-                        "total"),
-            name = method,
-            pseudocount = FALSE,
-            ...
-            ){
-        .Deprecated("transformAssay")
-        # Input check
-        # Check method
-        # If method is not single string, user has not specified transform method,
-        # or has given e.g. a vector
-        if(!.is_non_empty_string(method)){
-            stop("'method' must be a non-empty single character value.",
-                 call. = FALSE)
-        }
-        method <- match.arg(method, several.ok = FALSE)
-        # Input check end
-
-        # Call general transformation function with MARGIN specified
-        x <- transformAssay(x = x, assay.type = assay.type,
-                             method = method, MARGIN = "samples", name = name, ...)
-        
-        return(x)
-    }
-)
-
-#' @rdname transformAssay
-#' @aliases transformSamples
 #' @export
 setGeneric("transformAssay", signature = c("x"),
            function(x,
@@ -229,17 +127,7 @@ setGeneric("transformAssay", signature = c("x"),
                     ...)
                standardGeneric("transformAssay"))
 
-#transformCounts wrapper with a deprecation warning
 #' @rdname transformAssay
-#' @aliases transformSamples
-#' @export
-transformCounts <- function(x,...){
-    .Deprecated(old ="transformCounts" ,new = "transformAssay",msg = "The 'transformCounts' function is deprecated. Use 'transformAssay' instead.")
-    return(transformAssay(x,...))
-}
-
-#' @rdname transformAssay
-#' @aliases transformSamples
 #' @export
 setMethod("transformAssay", signature = c(x = "SummarizedExperiment"),
     function(x,
@@ -278,11 +166,7 @@ setMethod("transformAssay", signature = c(x = "SummarizedExperiment"),
         }
         method <- match.arg(method, several.ok = FALSE)
         # Check that MARGIN is 1 or 2
-        if( !(length(MARGIN) == 1L && MARGIN %in%
-              c("samples", "features", "columns", "col", "row")) ){
-            stop("'MARGIN' must be 'samples' or 'features'.",
-                 call. = FALSE)
-        }
+        MARGIN <- .check_MARGIN(MARGIN)
         # Check pseudocount
         if( !.is_a_bool(pseudocount) && !(is.numeric(pseudocount) && length(pseudocount) == 1 && pseudocount >= 0) ){
             stop("'pseudocount' must be TRUE, FALSE or a number equal to or greater than 0.",
@@ -295,7 +179,7 @@ setMethod("transformAssay", signature = c(x = "SummarizedExperiment"),
         assay <- assay(x, assay.type)
         
         # Apply pseudocount, if it is not 0
-        assay <- .apply_pseudocount(assay, pseudocount)
+        assay <- .apply_pseudocount(assay, pseudocount, ...)
         # Store pseudocount value and set attr equal to NULL
         pseudocount <- attr(assay, "pseudocount")
         attr(assay, "pseudocount") <- NULL
@@ -319,96 +203,15 @@ setMethod("transformAssay", signature = c(x = "SummarizedExperiment"),
     }
 )
 
-###############################transformFeatures################################
-
-#' @rdname transformAssay
-#' @export
-setGeneric("transformFeatures", signature = c("x"),
-           function(x,
-                    assay.type = "counts", assay_name = NULL,
-                    method = c("frequency", "log", "log10", "log2", "max",
-                               "pa", "range", "standardize", "z"),
-                    name = method,
-                    pseudocount = FALSE,
-                    ...)
-               standardGeneric("transformFeatures"))
-
-#' @rdname transformAssay
-#' @export
-setMethod("transformFeatures", signature = c(x = "SummarizedExperiment"),
-    function(x,
-             assay.type = "counts", assay_name = NULL,
-             method = c("frequency", "log", "log10", "log2", "max",
-                        "pa", "range", "standardize", "z"),
-             name = method,
-             pseudocount = FALSE,
-             ...){
-        
-        .Deprecated("transformAssay")
-
-        # Input check
-        # Check method
-        # If method is not single string, user has not specified transform method,
-        # or has given e.g. a vector
-        if(!.is_non_empty_string(method)){
-          stop("'method' must be a non-empty single character value.",
-               call. = FALSE)
-        }
-        
-        method <- match.arg(method, several.ok = FALSE)
-        # Input check end
-
-        # Call general transformation function with MARGIN specified
-        x <- transformAssay(x = x, assay.type = assay.type, method = method,
-                             MARGIN = "features", name = name, ...)
-        return(x)
-  }
-)
-##################################Z-TRANSFORM###################################
-
-#' @rdname transformAssay
-#' @export
-setGeneric("ZTransform", signature = c("x"),
-           function(x, MARGIN = "features", ...)
-             standardGeneric("ZTransform"))
-
-#' @rdname transformAssay
-#' @importFrom SummarizedExperiment assay assay<-
-#' @export
-setMethod("ZTransform", signature = c(x = "SummarizedExperiment"),
-          function(x, ...){
-	    .Deprecated("transformAssay")
-            transformAssay(x, method = "z", MARGIN = "features", ...)
-          }
-)
-
-###############################relAbundanceCounts###############################
-
-#' @rdname transformAssay
-#' @export
-setGeneric("relAbundanceCounts", signature = c("x"),
-            function(x, ...)
-            standardGeneric("relAbundanceCounts"))
-
-#' @rdname transformAssay
-#' @importFrom SummarizedExperiment assay assay<-
-#' @export
-setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
-    function(x, ...){
-	.Deprecated("transformAssay")    
-        transformAssay(x, method = "relabundance", MARGIN = "samples", ...)
-    }
-)
-
 ###########################HELP FUNCTIONS####################################
 ##############################.apply_transformation#############################
-# Help function for transformSamples and transformFeatures, takes abundance table
+# Help function for transformAssay, takes abundance table
 # as input and returns transformed table. This function utilizes mia's
 # transformation functions.
 .apply_transformation <- function(assay, method, MARGIN, ...){
 
     # Transpose if MARGIN is row
-    if( MARGIN %in% c("features", "row") ){
+    if( MARGIN == 1L ){
         assay <- t(assay)
     }
 
@@ -423,7 +226,7 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
         FUN, list(mat = assay, method = method, ...) )
 
     # Transpose back to normal if MARGIN is row
-    if( MARGIN %in% c("features", "row") ){
+    if( MARGIN == 1L ){
         transformed_table <- t(transformed_table)
     }
 
@@ -434,23 +237,26 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
 }
 
 ########################.apply_transformation_from_vegan########################
-# Help function for transformSamples and transformFeatures, takes abundance
+# Help function for transformAssay, takes abundance
 # table as input and returns transformed table. This function utilizes vegan's
 # transformation functions.
-.apply_transformation_from_vegan <- function(mat, method, MARGIN, ref_vals = NA, ...){
+.apply_transformation_from_vegan <- function(mat, method, MARGIN, reference = ref_vals,
+                                            ref_vals = NA, ...){
     # Input check
-    # Check ref_vals
-    if( length(ref_vals) != 1 ){
-        stop("'ref_vals' must be a single value specifying the ",
+    # Check reference
+    if( length(reference) != 1 ){
+        stop("'reference' must be a single value specifying the ",
              "values of the reference sample.",
              call. = FALSE)
     }
     # Input check end
-
-    # Adjust MARGIN for vegan. It requires MARGIN in numeric format
-    MARGIN <- ifelse(MARGIN %in% c("samples", "columns", "col", 2), 2, 1)
+    
     # Adjust method if mia-specific alias was used
     method <- ifelse(method == "relabundance", "total", method)
+    
+    if (method == "z") {
+        .Deprecated(old="z", new="standardize")
+    }
     method <- ifelse(method == "z", "standardize", method)
     
     # If method is ALR, vegan drops one column/sample, because it is used
@@ -465,7 +271,7 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
     if( method %in% c("alr") ){
         transformed_table <- .adjust_alr_table(
             mat = transformed_table, orig_dimnames = orig_dimnames,
-            ref_vals = ref_vals)
+            reference = reference)
     }
     # If table is transposed (like in chi.square), transpose back
     if(identical(rownames(transformed_table), colnames(mat)) &&
@@ -514,7 +320,7 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
 # vegan::decostand returns ALR transformed abundance table without reference
 # sample. Because in TreeSE all assays must have same row and column names,
 # the reference sample is assigned back to transformed abundance table.
-.adjust_alr_table <- function(mat, orig_dimnames, ref_vals){
+.adjust_alr_table <- function(mat, orig_dimnames, reference){
     # Store attributes
     attributes <- attributes(mat)
     # Get original and current sample/feature names and dimensions of reference
@@ -533,7 +339,7 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
         ref_dimnames <- list(var_names, reference_name)
         }
     # Reference sample as NAs or with symbols that are specified by user
-    reference_sample <- matrix(ref_vals, nrow = nrow, ncol = ncol,  
+    reference_sample <- matrix(reference, nrow = nrow, ncol = ncol,  
                                dimnames = ref_dimnames)
     # Add reference sample/feature
     if(MARGIN == 1){
@@ -554,30 +360,42 @@ setMethod("relAbundanceCounts", signature = c(x = "SummarizedExperiment"),
 
 ###############################.apply_pseudocount###############################
 # This function applies pseudocount to abundance table.
-.apply_pseudocount <- function(mat, pseudocount){
+.apply_pseudocount <- function(mat, pseudocount, na.rm = TRUE, ...){
     if( .is_a_bool(pseudocount) ){
-        # If pseudocount TRUE but some NAs or negative values, numerical pseudocount needed
-        if ( pseudocount && (any(is.na(mat)) || any(mat < 0, na.rm = TRUE)) ){
-            stop("The assay contains missing or negative values. ",
+        # If pseudocount TRUE and some NAs, a warning is issued
+        if ( pseudocount && any(is.na(mat)) ){
+            warning("The assay contains missing values (NAs). These will be 
+                ignored in pseudocount calculation.", call. = FALSE)
+        }    
+        # If pseudocount TRUE but some negative values, numerical pseudocount needed
+        if ( pseudocount && any(mat < 0, na.rm = TRUE) ){
+            stop("The assay contains negative values. ",
                  "'pseudocount' must be specified manually.", call. = FALSE)
         }
-        # If pseudocount TRUE, set it to non-zero minimum value, else set it to zero
-        pseudocount <- ifelse(pseudocount, min(mat[mat>0]), 0)
+        # If pseudocount TRUE, set it to  half of non-zero minimum value
+        # else set it to zero.
+        # Get min value
+        value <- min(mat[mat > 0], na.rm = na.rm)
+        value <- value/2
+        pseudocount <- ifelse(pseudocount, value, 0)
         # Report pseudocount if positive value
         if ( pseudocount > 0 ){
-            message(paste("A pseudocount of", pseudocount, "was applied."))
+            message("A pseudocount of ", pseudocount, " was applied.")
         }
     }
     # Give warning if pseudocount should not be added
     # Case 1: only positive values
     if( pseudocount != 0 && all(mat > 0, na.rm = TRUE) ){
-        warning("The assay contains only positive values. ",
-                "Applying a pseudocount may be unnecessary.", call. = FALSE)
+        warning(
+            "The assay contains only positive values. ",
+            "Applying a pseudocount may be unnecessary.", call. = FALSE)
     }
     # Case 2: some negative values
     if( pseudocount != 0 && any(mat < 0, na.rm = TRUE) ){
-        warning("The assay contains some negative values. ",
-                "Applying a pseudocount may produce meaningless data.", call. = FALSE)
+        warning(
+            "The assay contains some negative values. ",
+            "Applying a pseudocount may produce meaningless data.",
+            call. = FALSE)
     }
     # Add pseudocount
     mat <- mat + pseudocount

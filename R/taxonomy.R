@@ -29,49 +29,48 @@
 #'   returned. This function allows handy conversions between different
 #    taxonomic levels.
 #'
-#' @param x a
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
-#'   object
+#' @inheritParams agglomerate-methods
 #'
-#' @param rank a single character defining a taxonomic rank. Must be a value of
-#'   \code{taxonomyRanks()} function
+#' @param with.rank \code{Logical scalar}. Should the level be add as a
+#'   suffix? For example: "Phylum:Crenarchaeota". (Default: \code{FALSE})
+#' 
+#' @param with_rank Deprecated. Use \code{with.rank} instead.
 #'
-#' @param empty.fields a \code{character} value defining, which values should be
-#'   regarded as empty. (Default: \code{c(NA, "", " ", "\t")}). They will be
-#'   removed if \code{na.rm = TRUE} before agglomeration
+#' @param make.unique \code{Logical scalar}. Should the labels be made
+#'   unique, if there are any duplicates? (Default: \code{TRUE})
+#' 
+#' @param make_unique Deprecated. Use \code{make.unique} instead.
 #'
-#' @param with_rank \code{TRUE} or \code{FALSE}: Should the level be add as a
-#'   suffix? For example: "Phylum:Crenarchaeota" (default:
-#'   \code{with_rank = FALSE})
-#'
-#' @param make_unique \code{TRUE} or \code{FALSE}: Should the labels be made
-#'   unique, if there are any duplicates? (default: \code{make_unique = TRUE})
-#'
-#' @param resolve_loops \code{TRUE} or \code{FALSE}: Should \code{resolveLoops}
+#' @param resolve.loops \code{Logical scalar}. Should \code{resolveLoops}
 #'   be applied to the taxonomic data? Please note that has only an effect,
-#'   if the data is unique. (default: \code{resolve_loops = TRUE})
+#'   if the data is unique. (Default: \code{TRUE})
+#' 
+#' @param resolve_loops Deprecated. Use \code{resolve.loops} instead.
 #'
-#' @param taxa a \code{character} vector, which is used for subsetting the 
+#' @param taxa \code{Character vector}. Used for subsetting the 
 #'   taxonomic information. If no information is found,\code{NULL} is returned
-#'   for the individual element. (default: \code{NULL})
+#'   for the individual element. (Default: \code{NULL})
 #'
 #' @param from 
 #' \itemize{
-#'   \item{For \code{mapTaxonomy}: }{a scalar \code{character} value, which 
-#'     must be a valid taxonomic rank. (default: \code{NULL})}
-#'   \item{otherwise a \code{Taxa} object as returned by 
-#'     \code{\link[DECIPHER:IdTaxa]{IdTaxa}}}
+#'   \item For \code{mapTaxonomy}: \code{character scalar}. A value which 
+#'     must be a valid taxonomic rank. (Default: \code{NULL})
+#'   \item otherwise a \code{Taxa} object as returned by 
+#'     \code{\link[DECIPHER:IdTaxa]{IdTaxa}}
 #' }
 #'
-#' @param to a scalar \code{character} value, which must be a valid 
-#'   taxonomic rank. (default: \code{NULL})
+#' @param to \code{Character Scalar}. Must be a valid 
+#'   taxonomic rank. (Default: \code{NULL})
 #'   
-#' @param use_grepl \code{TRUE} or \code{FALSE}: should pattern matching via
+#' @param use.grepl \code{Logical}. Should pattern matching via
 #'   \code{grepl} be used? Otherwise literal matching is used.
-#'   (default: \code{FALSE})
+#'   (Default: \code{FALSE})
+#' 
+#' @param use_grepl Deprecated. Use \code{use.grepl} instead.
 #'
 #' @param ... optional arguments not used currently.
-#'
+#' 
+#' @param ranks \code{Character vector}. A vector of ranks to be set.
 #' @details
 #' Taxonomic information from the \code{IdTaxa} function of \code{DECIPHER}
 #' package are returned as a special class. With \code{as(taxa,"DataFrame")}
@@ -82,13 +81,13 @@
 #'
 #' @return
 #' \itemize{
-#'   \item{\code{taxonomyRanks}:} {a \code{character} vector with all the
-#'     taxonomic ranks found in \code{colnames(rowData(x))}}
-#'   \item{\code{taxonomyRankEmpty}:} {a \code{logical} value}
-#'   \item{\code{mapTaxonomy}:} {a \code{list} per element of taxa. Each 
+#'   \item \code{taxonomyRanks}: a \code{character} vector with all the
+#'     taxonomic ranks found in \code{colnames(rowData(x))}
+#'   \item \code{taxonomyRankEmpty}: a \code{logical} value
+#'   \item \code{mapTaxonomy}: a \code{list} per element of taxa. Each 
 #'     element is either a \code{DataFrame}, a \code{character} or \code{NULL}.
 #'     If all \code{character} results have the length of one, a single 
-#'     \code{character} vector is returned.}
+#'     \code{character} vector is returned.
 #' }
 #'
 #' @name taxonomy-methods
@@ -116,14 +115,55 @@
 #' mapTaxonomy(GlobalPatterns, taxa = "Escherichia")
 #' # returns information on a single output
 #' mapTaxonomy(GlobalPatterns, taxa = "Escherichia",to="Family")
+#' 
+#' # setTaxonomyRanks
+#' tse <- GlobalPatterns
+#' colnames(rowData(tse))[1] <- "TAXA1"
+#' 
+#' setTaxonomyRanks(colnames(rowData(tse)))
+#' # Taxonomy ranks set to: taxa1 phylum class order family genus species 
+#' 
+#' # getTaxonomyRanks is to get/check if the taxonomic ranks is set to "TAXA1"
+#' getTaxonomyRanks()
 NULL
 
-#' @rdname taxonomy-methods
-#' @format a \code{character} vector of length 8 containing the taxonomy ranks
+# This function returns all supported ranks and their prefixes. These ranks are
+# used to detect ranks in imported data.
+.taxonomy_rank_prefixes <- c(
+    domain = "d",
+    superkingdom = "sk",
+    kingdom = "k",
+    phylum = "p",
+    class = "c",
+    order = "o",
+    family = "f",
+    genus = "g",
+    species = "s",
+    strain = "t"
+)
+
+# Function to set taxonomy ranks prefixes (not exported)
+#' @importFrom utils assignInMyNamespace
+setTaxonomyRankPrefixes <- function(prefixes) {
+    # Check if prefixes is a character vector with length >= 1 and it has names
+    if( !(is.character(prefixes) && length(prefixes) > 0 &&
+            !is.null(names(prefixes))) ){
+        stop(
+            "'prefixes' must be a non-empty character vector and it must have ",
+            "names.", call. = FALSE)
+    }
+    # Replace default value of mia:::.taxonomy_rank_prefixes
+    assignInMyNamespace(".taxonomy_rank_prefixes", prefixes)
+}
+
+# Function to get taxonomy ranks prefixes (not exported)
+getTaxonomyRankPrefixes <- function() {
+    return(.taxonomy_rank_prefixes)
+}
+
+#' @format a \code{character} vector of length containing all the taxonomy ranks
 #'   recognized. In functions this is used as case insensitive.
-#' @export
-TAXONOMY_RANKS <- c("domain","kingdom","phylum","class","order","family",
-                    "genus","species")
+TAXONOMY_RANKS <- names(.taxonomy_rank_prefixes)
 
 #' @rdname taxonomy-methods
 setGeneric("taxonomyRanks", signature = c("x"),
@@ -197,6 +237,32 @@ setMethod("checkTaxonomy", signature = c(x = "SummarizedExperiment"),
     }
 )
 
+#' @rdname taxonomy-methods
+#' @importFrom utils assignInMyNamespace
+#' @aliases checkTaxonomy
+#' @export
+# Function to set taxonomy ranks
+setTaxonomyRanks <- function(ranks) {
+    ranks <- tolower(ranks)
+    # Check if rank is a character vector with length >= 1
+    if (!is.character(ranks) || length(ranks) < 1 
+        || any(ranks == "" | ranks == " " | ranks == "\t" | ranks == "-" | ranks == "_")
+        || any(grepl("\\s{2,}", ranks))) {
+        stop("Input 'rank' should be a character vector with non-empty strings,
+             no spaces, tabs, hyphens, underscores, and non-continuous spaces."
+             , call. = FALSE)
+    }
+    #Replace default value of mia::TAXONOMY_RANKS
+    assignInMyNamespace("TAXONOMY_RANKS", ranks)
+}
+
+#' @rdname taxonomy-methods
+#' @export
+# Function to get taxonomy ranks
+getTaxonomyRanks <- function() {
+    return(TAXONOMY_RANKS)
+}
+
 .check_taxonomic_rank <- function(rank, x){
     if(length(rank) != 1L){
         stop("'rank' must be a single character value.",call. = FALSE)
@@ -247,8 +313,9 @@ setGeneric("getTaxonomyLabels",
 #' @aliases checkTaxonomy
 #' @export
 setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
-    function(x, empty.fields = c(NA, "", " ", "\t", "-", "_"),
-            with_rank = FALSE, make_unique = TRUE, resolve_loops = FALSE, ...){
+    function(x, empty.fields = c(NA, "", " ", "\t", "-", "_"), with.rank = with_rank,
+            with_rank = FALSE, make.unique = make_unique, make_unique = TRUE, 
+            resolve.loops = resolve_loops, resolve_loops = FALSE, ...){
         # input check
         if(nrow(x) == 0L){
             stop("No data available in `x` ('x' has nrow(x) == 0L.)",
@@ -262,14 +329,14 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
             stop("'empty.fields' must be a character vector with one or ",
                  "more values.", call. = FALSE)
         }
-        if(!.is_a_bool(with_rank)){
-            stop("'with_rank' must be TRUE or FALSE.", call. = FALSE)
+        if(!.is_a_bool(with.rank)){
+            stop("'with.rank' must be TRUE or FALSE.", call. = FALSE)
         }
-        if(!.is_a_bool(make_unique)){
-            stop("'make_unique' must be TRUE or FALSE.", call. = FALSE)
+        if(!.is_a_bool(make.unique)){
+            stop("'make.unique' must be TRUE or FALSE.", call. = FALSE)
         }
-        if(!.is_a_bool(resolve_loops)){
-            stop("'resolve_loops' must be TRUE or FALSE.", call. = FALSE)
+        if(!.is_a_bool(resolve.loops)){
+            stop("'resolve.loops' must be TRUE or FALSE.", call. = FALSE)
         }
         #
         dup <- duplicated(rowData(x)[,taxonomyRanks(x)])
@@ -280,14 +347,14 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
         }
         ans <- .get_taxonomic_label(x[!dup,],
                                     empty.fields = empty.fields,
-                                    with_rank = with_rank,
-                                    resolve_loops = resolve_loops)
+                                    with.rank = with.rank,
+                                    resolve.loops = resolve.loops)
         if(any(dup)){
             ans <- ans[m]
         }
         # last resort - this happens, if annotation data contains ambiguous data
         # sometimes labeled as "circles"
-        if(make_unique && anyDuplicated(ans)){
+        if(make.unique && anyDuplicated(ans)){
             dup <- which(ans %in% ans[which(duplicated(ans))])
             ans[dup] <- make.unique(ans[dup], sep = "_")
         }
@@ -341,8 +408,8 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
 
 .get_taxonomic_label <- function(x,
                                 empty.fields = c(NA, "", " ", "\t", "-", "_"),
-                                with_rank = FALSE,
-                                resolve_loops = FALSE){
+                                with.rank = FALSE,
+                                resolve.loops = FALSE){
     rd <- rowData(x)
     tax_cols <- .get_tax_cols_from_se(x)
     tax_ranks_selected <- .get_tax_ranks_selected(x, rd, tax_cols, empty.fields)
@@ -351,7 +418,7 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
     }
     tax_cols_selected <- tax_cols[tax_ranks_selected]
     # resolve loops
-    if(resolve_loops){
+    if(resolve.loops){
         td <- as.data.frame(rd[,tax_cols])
         td <- suppressWarnings(resolveLoop(td))
         rd[,tax_cols] <- as(td,"DataFrame")
@@ -364,7 +431,7 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
                     tax_cols_selected,
                     SIMPLIFY = FALSE)
     ans <- unlist(ans, use.names = FALSE)
-    if(with_rank || !all_same_rank){
+    if(with.rank || !all_same_rank){
         ans <- .add_taxonomic_type(rd, ans, tax_cols_selected)
     }
     ans
@@ -376,39 +443,45 @@ setMethod("getTaxonomyLabels", signature = c(x = "SummarizedExperiment"),
 #' \code{\link[TreeSummarizedExperiment:TreeSummarizedExperiment-class]{SummarizedExperiment}}
 #' object and add this hierarchy tree into the \code{rowTree}.
 #' 
-#' \code{addHierarchyTree} calculates hierarchy tree from the available taxonomic
-#'   information and add it to \code{rowTree}.
+#' @inheritParams taxonomy-methods
+#' 
+#' @details
+#' 
+#' \code{addHierarchyTree} calculates a hierarchy tree from the available 
+#'   taxonomic information and add it to \code{rowTree}.
 #'   
 #' \code{getHierarchyTree} generates a hierarchy tree from the available
 #'   taxonomic information. Internally it uses
 #'   \code{\link[TreeSummarizedExperiment:toTree]{toTree}} and
 #'   \code{\link[TreeSummarizedExperiment:resolveLoop]{resolveLoop}} to sanitize
 #'   data if needed.
-#' 
-#' @inheritParams taxonomy-methods
+#'   
+#' Please note that a hierarchy tree is not an actual phylogenetic tree.
+#' A phylogenetic tree represents evolutionary relationships among features.
+#' On the other hand, a hierarchy tree organizes species into a hierarchical 
+#' structure based on their taxonomic ranks. 
 #' 
 #' @return
 #' \itemize{
-#'   \item{\code{addHierarchyTree}:} {a \code{TreeSummarizedExperiment} whose
+#'   \item \code{addHierarchyTree}: a \code{TreeSummarizedExperiment} whose
 #'   \code{phylo} tree represents the hierarchy among available taxonomy 
-#'   information}
-#'   \item{\code{getHierarchyTree}:} {a \code{phylo} tree representing the 
-#'   hierarchy among available taxonomy information.}
+#'   information.
+#'   \item \code{getHierarchyTree}: a \code{phylo} tree representing the 
+#'   hierarchy among available taxonomy information.
 #' }
 #' 
 #' @name hierarchy-tree
 #' 
 #' @examples
-#' # Generating a hierarchy tree based on available taxonomic information.
+#' # Generate a tree based on taxonomic rank hierarchy (a hierarchy tree).
 #' data(GlobalPatterns)
 #' tse <- GlobalPatterns
 #' getHierarchyTree(tse)
 #' 
-#' # Adding a hierarchy tree based on the available taxonomic information. 
+#' # Add a hierarchy tree to a TreeSummarizedExperiment.
 #' # Please note that any tree already stored in rowTree() will be overwritten.
 #' tse <- addHierarchyTree(tse)
 #' tse
-#' 
 NULL
 
 #' @rdname hierarchy-tree
@@ -422,22 +495,46 @@ setGeneric("getHierarchyTree",
 #' @export
 #' @importFrom ape drop.tip
 setMethod("getHierarchyTree", signature = c(x = "SummarizedExperiment"),
-    function(x){
+    function(x, ...){
         # Input check
         # If there is no rowData it is not possible to create rowTree
         if( ncol(rowData(x)) == 0L ){
             stop("'x' does not have rowData. Tree cannot be created.", 
                 call. = FALSE)
         }
+        # If there are no taxonomy ranks
+        if( length(taxonomyRanks(x)) < 2L ){
+            stop(
+                "'x' does not contain adequate taxonomy information, and ",
+                "hierarchy tree cannot be created. Check rowData and consider ",
+                "using setTaxonomyRanks() if ranks differ from defaults..",
+                call. = FALSE)
+        }
         #
-        # Converted to data.frame so that drop = FALSE is enabled
-        td <- data.frame(rowData(x)[,taxonomyRanks(x)])
-        # Remove empty taxonomic levels
-        td <- td[,!vapply(td,function(tl){all(is.na(tl))},logical(1)), drop = FALSE]
-        # Make information unique
-        td_NA <- DataFrame(lapply(td,is.na))
+        # Get rowData as data.frame
+        td <- rowData(x)[, taxonomyRanks(x), drop = FALSE]
         td <- as.data.frame(td)
-        td <- as(suppressWarnings(resolveLoop(td)),"DataFrame")
+        # Get information on empty nodes. It will be used later to polish the
+        # created tree.
+        td_NA <- .get_empty_nodes(td, ...)
+        # Replace empty cells with NA (also "" can be empty value)
+        for( i in seq_len(ncol(td_NA)) ){
+            td[td_NA[[i]], i] <- NA
+        }
+        # Remove empty taxonomic levels
+        td <- td[ , !vapply(td_NA, all, logical(1)), drop = FALSE]
+        # Check if there is no taxonomy information left after removing empty
+        # columns
+        if( ncol(td) < 2L ){
+            stop(
+                "'x' does not contain adequate taxonomy information, and ",
+                "hierarchy tree cannot be created. Check rowData and consider ",
+                "using setTaxonomyRanks() if ranks differ from defaults.",
+                call. = FALSE)
+        }
+        # Make cells unique. Add suffix, if duplicated values are found from
+        # certain rank.
+        td <- suppressWarnings(resolveLoop(td))
         # Build tree
         tree <- toTree(td)
         tree$tip.label <- paste0(colnames(td)[ncol(td)],":",tree$tip.label)
@@ -452,7 +549,7 @@ setMethod("getHierarchyTree", signature = c(x = "SummarizedExperiment"),
                     collapse.singles = FALSE)
             }
         }
-        tree
+        return(tree)
     }
 )
 
@@ -465,15 +562,18 @@ setGeneric("addHierarchyTree",
 #' @rdname hierarchy-tree
 #' @export
 setMethod("addHierarchyTree", signature = c(x = "SummarizedExperiment"),
-    function(x){
+    function(x, ...){
         #
-        tree <- getHierarchyTree(x)
+        # Get the tree
+        tree <- getHierarchyTree(x, ...)
+        # Ensure that the object has rowTree slot
         x <- as(x,"TreeSummarizedExperiment")
-        rownames(x) <- getTaxonomyLabels(x, with_rank = TRUE,
-                                        resolve_loops = TRUE,
-                                        make_unique = FALSE)
-        x <- changeTree(x, tree, rownames(x))
-        x
+        # Get node labs: which row represents which node in the tree?
+        node_labs <- getTaxonomyLabels(
+            x, with.rank = TRUE, resolve.loops = TRUE, make.unique = FALSE)
+        # Add tree
+        x <- changeTree(x, tree, node_labs)
+        return(x)
     }
 )
 
@@ -484,12 +584,12 @@ setGeneric("mapTaxonomy",
                 standardGeneric("mapTaxonomy"))
 
 #' @importFrom BiocGenerics %in% grepl
-.get_taxa_row_match <- function(taxa, td, from, use_grepl = FALSE){
+.get_taxa_row_match <- function(taxa, td, from, use.grepl = FALSE){
     if(is.na(taxa)){
         r_f <- is.na(td[[from]])
     } else {
-        if(use_grepl){
-            r_f <- grepl(taxa, td[[from]])
+        if(use.grepl){
+            r_f <- grepl(taxa, td[[from]], ignore.case = TRUE)
         } else {
             r_f <- td[[from]] %in% taxa
         }
@@ -499,12 +599,13 @@ setGeneric("mapTaxonomy",
 }
 
 #' @importFrom BiocGenerics %in% grepl
-.get_taxa_any_match <- function(taxa, td, use_grepl = FALSE){
+.get_taxa_any_match <- function(taxa, td, use.grepl = FALSE){
     if(is.na(taxa)){
         r_f <- is.na(td)
     } else {
-        if(use_grepl){
-            r_f <- vapply(td,grepl,logical(nrow(td)),pattern=taxa)
+        if(use.grepl){
+            r_f <- vapply(
+                td, grepl, logical(nrow(td)), pattern=taxa, ignore.case = TRUE)
         } else {
             r_f <- t(as.matrix(td %in% taxa))
         }
@@ -518,7 +619,8 @@ setGeneric("mapTaxonomy",
 #' @importFrom BiocGenerics %in%
 #' @export
 setMethod("mapTaxonomy", signature = c(x = "SummarizedExperiment"),
-    function(x, taxa = NULL, from = NULL, to = NULL, use_grepl = FALSE){
+    function(x, taxa = NULL, from = NULL, to = NULL, use.grepl = use_grepl,
+            use_grepl = FALSE){
         # input check
         if(!checkTaxonomy(x)){
             stop("Non compatible taxonomic information found. ",
@@ -556,8 +658,8 @@ setMethod("mapTaxonomy", signature = c(x = "SummarizedExperiment"),
                 stop("'from' and 'to' must be different values.", call. = FALSE)    
             }
         }
-        if(!.is_a_bool(use_grepl)){
-            stop("'use_grepl' must be TRUE or FALSE.", call. = FALSE)
+        if(!.is_a_bool(use.grepl)){
+            stop("'use.grepl' must be TRUE or FALSE.", call. = FALSE)
         }
         #
         td <- rowData(x)[,taxonomyRanks(x)]
@@ -567,13 +669,17 @@ setMethod("mapTaxonomy", signature = c(x = "SummarizedExperiment"),
         #
         r_fs <- NULL
         c_f <- rep(TRUE,ncol(td))
+        # Get unique taxa to search
+        taxa <- unique(taxa)
         if(!is.null(from)){
-            r_fs <- lapply(taxa, .get_taxa_row_match, td = td, from = from,
-                            use_grepl = use_grepl)
+            r_fs <- lapply(
+                taxa, .get_taxa_row_match, td = td, from = from,
+                use.grepl = use.grepl)
             names(r_fs) <- taxa
         } else {
-            r_fs <- lapply(taxa, .get_taxa_any_match, td = td,
-                            use_grepl = use_grepl)
+            r_fs <- lapply(
+                taxa, .get_taxa_any_match, td = td,
+                use.grepl = use.grepl)
             names(r_fs) <- taxa
         }
         if(!is.null(to)) {
@@ -618,13 +724,19 @@ setMethod("mapTaxonomy", signature = c(x = "SummarizedExperiment"),
 }
 
 #' @importFrom SummarizedExperiment rowData
-.get_tax_groups <- function(x, col, onRankOnly = FALSE){
+.get_tax_groups <- function(x, col, ignore.taxonomy = onRankOnly, 
+    onRankOnly = FALSE, ...){
+    # input check
+    if(!.is_a_bool(ignore.taxonomy)){
+        stop("'ignore.taxonomy' must be TRUE or FALSE.", call. = FALSE)
+    }
+    
     tax_cols <- .get_tax_cols_from_se(x)
     tax_col_n <- seq_along(tax_cols)
     if(length(tax_col_n) < col){
         stop(".")
     }
-    if(onRankOnly){
+    if(ignore.taxonomy){
         groups <- rowData(x)[,tax_cols[tax_col_n == col],drop=TRUE]
     } else {
         groups <- rowData(x)[,tax_cols[tax_col_n <= col],drop=FALSE]
@@ -670,3 +782,23 @@ setMethod("mapTaxonomy", signature = c(x = "SummarizedExperiment"),
 #' @rdname taxonomy-methods
 #' @export
 IdTaxaToDataFrame <- .idtaxa_to_DataFrame
+
+# This function gives information on if cell in taxonomy table is empty or not.
+.get_empty_nodes <- function(
+        td, empty.fields = c(NA, "", " ", "\t", "-", "_"), ...){
+    # Check empty.fields
+    if(!is.character(empty.fields) || length(empty.fields) == 0L){
+        stop(
+            "'empty.fields' must be a character vector with one or ",
+            "more value", call. = FALSE)
+    }
+    #
+    # Loop over columns. For each cell, get info if the cell is empty or not.
+    is_empty <- lapply(td, function(x){
+        temp <- x %in% empty.fields
+        return(temp)
+    })
+    # Convert to data.frame
+    is_empty <- as.data.frame(is_empty)
+    return(is_empty)
+}

@@ -8,8 +8,8 @@
 #' summarization.
 #'
 #' @name mia-package
-#' @docType package
 #' @seealso \link[TreeSummarizedExperiment:TreeSummarizedExperiment-class]{TreeSummarizedExperiment}
+"_PACKAGE"
 NULL
 
 #' @import methods
@@ -61,7 +61,7 @@ NULL
 #' tse
 NULL
 
-#' GlobalPatterns
+#' Global patterns of 16S rRNA diversity at a depth of millions of sequences per sample.
 #'
 #' GlobalPatterns compared the microbial communities from 25 environmental samples
 #' and three known "mock communities" at a an average depth of 3.1 million reads
@@ -101,7 +101,7 @@ NULL
 #' PNAS, 108, 4516-4522. \url{https://doi.org/10.1073/pnas.1000080107}
 NULL
 
-#' enterotype
+#' Human gut microbiome dataset from 22 subjects based on shotgun DNA sequencing
 #'
 #' The enterotype data of the human gut microbiome includes taxonomic profiling
 #' for 280 fecal samples from 22 subjects based on shotgun DNA sequencing. The
@@ -146,7 +146,7 @@ NULL
 #' @source \url{http://www.bork.embl.de/Docu/Arumugam_et_al_2011/downloads.html}
 NULL
 
-#' esophagus
+#' Human esophageal community from 3 individuals
 #' 
 #' This small dataset from a human esophageal community includes 3 samples from
 #' 3 human adults based on biopsies analysed with 16S rDNA PCR. The 16S rRNA
@@ -175,7 +175,7 @@ NULL
 #' @source \url{http://www.mothur.org/wiki/Esophageal_community_analysis}
 NULL
 
-#' dmn_se
+#' Twins' microbiome data from 278 individuals
 #'
 #' dmn_se is a dataset on twins' microbiome where samples are stratified by
 #' their community composition through Dirichlet Multinomial Mixtures (DMM). It
@@ -207,7 +207,7 @@ NULL
 #' \url{https://doi.org/10.1038/nature07540}
 NULL
 
-#' peerj13075
+#' Skin microbial profiles 58 genetically unrelated individuals
 #' 
 #' peerj13075 includes skin microbial profiles of 58 volunteers with multiple
 #' factors. 16S r-RNA sequencing of V3-V4 regions was done to generate millions
@@ -244,7 +244,7 @@ NULL
 #' \url{https://www.doi.org/10.7717/peerj.13075/supp-2}
 NULL
 
-#' HintikkaXOData
+#' Multiomics dataset from 40 rat samples
 #' 
 #' HintikkaXO is a multiomics dataset from a rat experiment studying effect of
 #' fat and prebiotics in diet. It contains high-throughput profiling data from
@@ -284,7 +284,7 @@ NULL
 #' 
 NULL
 
-#' Tengeler2020
+#'  Gut microbiota profiles of 27 individuals with ADHD and healthy controls
 #' 
 #' Tengeler2020 includes gut microbiota profiles of 27 persons with ADHD. A
 #' standard bioinformatic and statistical analysis done to demonstrate that
@@ -320,5 +320,42 @@ NULL
 #' \url{https://static-content.springer.com/esm/art%3A10.1186%2Fs40168-020-00816-x/MediaObjects/40168_2020_816_MOESM1_ESM.docx}
 #' \url{https://static-content.springer.com/esm/art%3A10.1186%2Fs40168-020-00816-x/MediaObjects/40168_2020_816_MOESM2_ESM.docx}
 #' \url{https://static-content.springer.com/esm/art%3A10.1186%2Fs40168-020-00816-x/MediaObjects/40168_2020_816_MOESM3_ESM.docx}
+#' 
+NULL
+
+#' Fecal microbiota samples from 589 patients across different colorectal cancer stages
+#'
+#' The study combined Quantitative Microbiome Profiling (QMP) with 
+#' extensive patient phenotyping from a group of 589 colorectal cancer (CRC) 
+#' patients, advanced adenoma (AA) patients, and healthy controls. 
+#' By implementing confounder control and quantitative profiling methods, the study 
+#' was able to reveal potential misleading associations between microbial markers 
+#' and colorectal cancer development that were driven by other factors like intestinal 
+#' inflammation, rather than the cancer diagnosis itself.
+#'
+#' @format A TreeSummarizedExperiment with 676 features and 589 samples. 
+#' The rowData contains species. The colData includes:
+#' 
+#' \describe{
+#'   \item{sampleID}{(character) Sample ID from the corresponding study}
+#'   \item{diagnosis}{(factor) Diagnosis type, with possible values: "ADE" (advanced adenoma), 
+#'   "CRC" (colorectal cancer), "CTL" (control)}
+#'   \item{colonoscopy}{(factor) Colonoscopy result, with possible values: "FIT_Positive", 
+#'   "familial_risk_familial_CRC_FCC", "familial_risk_no", "abdomil_complaints"}
+#' }
+#'
+#' @name Tito2024QMP
+#' @docType data
+#' @keywords datasets
+#' @usage data(Tito2024QMP)
+#' @seealso \code{\link{mia-datasets}}
+#' @author 
+#' Shadman Ishraq
+#' @references
+#' Raúl Y. Tito, Sara Verbandt, Marta Aguirre Vazquez, Leo Lahti, Chloe Verspecht, Verónica Lloréns-Rico, Sara Vieira-Silva,
+#' Janine Arts, Gwen Falony, Evelien Dekker, Joke Reumers, Sabine Tejpar & Jeroen Raes (2024). 
+#' Microbiome confounders and quantitative profiling challenge predicted microbial targets in colorectal cancer development. 
+#' Nature Medicine,30, 1339-1348. 
+#' \url{https://doi.org/10.1038/s41591-024-02963-2}
 #' 
 NULL

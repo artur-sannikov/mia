@@ -3,10 +3,10 @@
 #' These functions perform Canonical Correspondence Analysis on data stored
 #' in a \code{SummarizedExperiment}.
 #'
-#' @param x For \code{calculate*} a 
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}} 
-#'   or a numeric matrix with columns as samples 
+#' @inheritParams getDominant
+#' @inheritParams getDissimilarity
 #'
+#' @details
 #'   For \code{run*} a
 #'   \code{\link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment}}
 #'   or a derived object.
@@ -19,7 +19,7 @@
 #'   \code{variables} and \code{formula} can be missing, which turns the CCA analysis 
 #'   into a CA analysis and dbRDA into PCoA/MDS.
 #'
-#' @param variables When \code{x} is a \code{SummarizedExperiment},
+#' @param variables \code{Character scalar}. When \code{x} is a \code{SummarizedExperiment},
 #'   \code{variables} can be used to specify variables from \code{colData}. 
 #'   
 #'   When \code{x} is a matrix, \code{variables} is a \code{data.frame} or 
@@ -29,54 +29,50 @@
 #'   \code{variables} and \code{formula} can be missing, which turns the CCA analysis 
 #'   into a CA analysis and dbRDA into PCoA/MDS.
 #' 
-#' @param test.signif a logical scalar, should the PERMANOVA and analysis of
+#' @param test.signif \code{Logical scalar}. Should the PERMANOVA and analysis of
 #'   multivariate homogeneity of group dispersions be performed.
-#'   (By default: \code{test.signif = TRUE})
-#'
-#' @param assay.type a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'
-#' @param exprs_values a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead.)
+#'   (Default: \code{TRUE})
 #'   
-#' @param assay_name a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead. At some point \code{assay_name}
-#'   will be disabled.)
-#'   
-#' @param altexp String or integer scalar specifying an alternative experiment
+#' @param altexp \code{Character scalar} or \code{integer scalar}. Specifies an alternative experiment
 #'   containing the input data.
-#'
-#' @param name String specifying the name to be used to store the result in the
-#'   reducedDims of the output.
 #' 
-#' @param scores A string specifying scores to be returned. Must be
+#' @param name \code{Character scalar}. A name for the column of the 
+#'   \code{colData} where results will be stored. (Default: \code{"CCA"})
+#' 
+#' @param scores \code{Character scalar}. Specifies scores to be returned. Must be
 #' 'wa' (site scores found as weighted averages (cca) or weighted sums (rda) of
 #' v with weights Xbar, but the multiplying effect of eigenvalues removed) or
-#' 'u' ((weighted) orthonormal site scores). (By default: \code{scores='wa'})
+#' 'u' ((weighted) orthonormal site scores). (Default: \code{'wa'})
+#' 
+#' @param exprs_values Deprecated. Use \code{assay.type} instead.
 #'
 #' @param ... additional arguments passed to vegan::cca or vegan::dbrda and
 #' other internal functions.
 #' \itemize{
 #'   \item{\code{method} a dissimilarity measure to be applied in dbRDA and
 #'   possible following homogeneity test. (By default: \code{method="euclidean"})}
-#'   \item{\code{scale} a logical scalar, should the expression values be
+#'   \item{\code{scale}: \code{Logical scalar}. Should the expression values be
 #'   standardized? \code{scale} is disabled when using \code{*RDA} functions.
-#'   Please scale before performing RDA. (By default: \code{scale=TRUE})}
-#'   \item{\code{full} a logical scalar, should all the results from the
+#'   Please scale before performing RDA. (Default: \code{TRUE})}
+#'   \item{\code{na.action}: \code{function}. Action to take when missing
+#'   values for any of the variables in \code{formula} are encountered.
+#'   (Default: \code{na.fail})}
+#'   \item{\code{full} \code{Logical scalar}. should all the results from the
 #'   significance calculations be returned. When \code{full=FALSE}, only
-#'   summary tables are returned. (By default: \code{full=FALSE})}
-#'   \item{\code{homogeneity.test} a single \code{character} value for specifying
+#'   summary tables are returned. (Default: \code{FALSE})}
+#'   \item{\code{homogeneity.test}: \code{Character scalar}. Specifies
 #'   the significance test used to analyse \code{vegan::betadisper} results.
 #'   Options include 'permanova' (\code{vegan::permutest}), 'anova'
 #'   (\code{stats::anova}) and 'tukeyhsd' (\code{stats::TukeyHSD}).
 #'   (By default: \code{homogeneity.test="permanova"})}
+#'   \item{\code{permutations} a numeric value specifying the number of permutations 
+#'   for significance testing in \code{vegan::anova.cca}. (By default: \code{permutations=999})}
 #' }
 #' 
 #' @details
 #'   *CCA functions utilize \code{vegan:cca} and *RDA functions \code{vegan:dbRDA}.
-#'   By default dbRDA is done with euclidean distances which equals to RDA.
+#'   By default, dbRDA is done with euclidean distances, which is equivalent to
+#'   RDA. 
 #'   
 #'   Significance tests are done with \code{vegan:anova.cca} (PERMANOVA). Group
 #'   dispersion, i.e., homogeneity within groups is analyzed with 
@@ -85,11 +81,11 @@
 #'   specified by \code{homogeneity.test} parameter.
 #'
 #' @return
-#' For \code{calculateCCA} a matrix with samples as rows and CCA dimensions as
+#' For \code{getCCA} a matrix with samples as rows and CCA dimensions as
 #' columns. Attributes include calculated \code{cca}/\code{rda} object and
 #' significance analysis results.
 #'
-#' For \code{runCCA} a modified \code{x} with the results stored in
+#' For \code{addCCA} a modified \code{x} with the results stored in
 #' \code{reducedDim} as the given \code{name}.
 #'
 #' @name runCCA
@@ -98,59 +94,87 @@
 #' and \code{\link[vegan:dbrda]{dbrda}}
 #'
 #' @examples
-#' library(scater)
-#' data(GlobalPatterns)
-#' GlobalPatterns <- runCCA(GlobalPatterns, data ~ SampleType)
-#' plotReducedDim(GlobalPatterns,"CCA", colour_by = "SampleType")
-#' 
-#' # Fetch significance results
-#' attr(reducedDim(GlobalPatterns, "CCA"), "significance")
+#' library(miaViz)
+#' data("enterotype", package = "mia")
+#' tse <- enterotype
 #'
-#' GlobalPatterns <- runRDA(GlobalPatterns, data ~ SampleType)
-#' plotReducedDim(GlobalPatterns,"CCA", colour_by = "SampleType")
-#' 
+#' # Perform CCA and exclude any sample with missing ClinicalStatus
+#' tse <- addCCA(tse,
+#'               formula = data ~ ClinicalStatus,
+#'               na.action = na.exclude)
+#'
+#' # Plot CCA
+#' plotCCA(tse, "CCA",
+#'         colour_by = "ClinicalStatus")
+#'
+#' # Fetch significance results
+#' attr(reducedDim(tse, "CCA"), "significance")
+#'
+#' tse <- transformAssay(tse, method = "relabundance")
+#'
 #' # Specify dissimilarity measure
-#' GlobalPatterns <- transformAssay(GlobalPatterns, method = "relabundance")
-#' GlobalPatterns <- runRDA(
-#'     GlobalPatterns, data ~ SampleType, assay.type = "relabundance",  method = "bray")
-#' 
-#' # To scale values when using *RDA functions, use transformAssay(MARGIN = "features", ...) 
-#' tse <- GlobalPatterns
-#' tse <- transformAssay(tse, MARGIN = "features", method = "z")
-#' # Data might include taxa that do not vary. Remove those because after z-transform
-#' # their value is NA
-#' tse <- tse[ rowSums( is.na( assay(tse, "z") ) ) == 0, ]
+#' tse <- addRDA(tse,
+#'               formula = data ~ ClinicalStatus,
+#'               assay.type = "relabundance",
+#'               method = "bray",
+#'               name = "RDA_bray")
+#'
+#' # To scale values when using *RDA functions, use
+#' # transformAssay(MARGIN = "features", ...) 
+#' tse <- transformAssay(tse,
+#'                       method = "standardize",
+#'                       MARGIN = "features")
+#'
+#' # Data might include taxa that do not vary. Remove those because after
+#' # z-transform their value is NA
+#' tse <- tse[rowSums(is.na(assay(tse, "standardize"))) == 0, ]
+#'
 #' # Calculate RDA
-#' tse <- runRDA(tse, formula = data ~ SampleType,
-#'               assay.type = "z", name = "rda_scaled", na.action = na.omit)
-#' # Plot
-#' plotReducedDim(tse,"rda_scaled", colour_by = "SampleType")
+#' tse <- addRDA(tse,
+#'               formula = data ~ ClinicalStatus,
+#'               assay.type = "standardize",
+#'               name = "rda_scaled",
+#'               na.action = na.omit)
+#'
+#' # Plot RDA
+#' plotRDA(tse, "rda_scaled",
+#'         colour_by = "ClinicalStatus")
+#'
 #' # A common choice along with PERMANOVA is ANOVA when statistical significance
-#' # of homogeneity of groups is analysed. Moreover, full signficance test results
-#' # can be returned.
-#'  tse <- runRDA(tse, data ~ SampleType, homogeneity.test = "anova", full = TRUE)
-#' 
+#' # of homogeneity of groups is analysed. Moreover, full significance test
+#' # results can be returned.
+#' tse <- addRDA(tse,
+#'               formula = data ~ ClinicalStatus,
+#'               homogeneity.test = "anova",
+#'               full = TRUE)
+#'
+#' # Example showing how to pass extra parameters, such as 'permutations',
+#' # to anova.cca
+#' tse <- addRDA(tse,
+#'               formula = data ~ ClinicalStatus,
+#'               permutations = 500)
+#'
 NULL
 
 #' @rdname runCCA
-setGeneric("calculateCCA", signature = c("x"),
+setGeneric("getCCA", signature = c("x"),
            function(x, ...)
-               standardGeneric("calculateCCA"))
+               standardGeneric("getCCA"))
 
 #' @rdname runCCA
-setGeneric("runCCA", signature = c("x"),
+setGeneric("addCCA", signature = c("x"),
            function(x, ...)
-               standardGeneric("runCCA"))
+               standardGeneric("addCCA"))
 
 #' @rdname runCCA
-setGeneric("calculateRDA", signature = c("x"),
+setGeneric("getRDA", signature = c("x"),
            function(x, ...)
-               standardGeneric("calculateRDA"))
+               standardGeneric("getRDA"))
 
 #' @rdname runCCA
-setGeneric("runRDA", signature = c("x"),
+setGeneric("addRDA", signature = c("x"),
            function(x, ...)
-               standardGeneric("runRDA"))
+               standardGeneric("addRDA"))
 
 .remove_special_functions_from_terms <- function(terms){
     names(terms) <- terms
@@ -175,9 +199,9 @@ setGeneric("runRDA", signature = c("x"),
     return(dep_var)
 }
 
-#' @importFrom stats as.formula
-.calculate_cca <- function(x, formula, variables, scores,  scale = TRUE, ...){
-    .require_package("vegan")
+#' @importFrom stats as.formula na.fail
+.calculate_cca <- function(
+        x, formula, variables, scores, scale = TRUE, na.action = na.fail, ...){
     # input check
     if(!.is_a_bool(scale)){
         stop("'scale' must be TRUE or FALSE.", call. = FALSE)
@@ -185,19 +209,28 @@ setGeneric("runRDA", signature = c("x"),
     #
     x <- as.matrix(t(x))
     variables <- as.data.frame(variables)
+    # Instead of letting na.action pass through, give informative error
+    # about missing values.
+    if( any(is.na(variables)) && isTRUE(all.equal(na.action, na.fail)) ){
+        stop("Variables contain missing values. Set na.action to na.exclude",
+             " to remove samples with missing values.", call. = FALSE)
+    }
+    
     if(ncol(variables) > 0L && !missing(formula)){
         dep_var_name <- .get_dependent_var_name(formula)
         assign(dep_var_name, x)
         # recast formula in current environment
         form <- as.formula(paste(as.character(formula)[c(2,1,3)],
                                  collapse = " "))
-        cca <- vegan::cca(form, data = variables, scale = scale, ...)
+        cca <- vegan::cca(form, data = variables, scale = scale,
+                          na.action = na.action, ...)
         X <- cca$CCA
     } else if(ncol(variables) > 0L) {
-        cca <- vegan::cca(X = x, Y = variables, scale = scale, ...)
+        cca <- vegan::cca(X = x, Y = variables, scale = scale,
+                          na.action = na.action, ...)
         X <- cca$CCA
     } else {
-        cca <- vegan::cca(X = x, scale = scale, ...)
+        cca <- vegan::cca(X = x, scale = scale, na.action = na.action, ...)
         X <- cca$CA
     }
     # Create the matrix to be returned
@@ -210,7 +243,7 @@ setGeneric("runRDA", signature = c("x"),
 
 #' @export
 #' @rdname runCCA
-setMethod("calculateCCA", "ANY",
+setMethod("getCCA", "ANY",
       function(x, ...){
           .calculate_cca(x, ...)
       })
@@ -250,7 +283,7 @@ setMethod("calculateCCA", "ANY",
 
 #' @export
 #' @rdname runCCA
-setMethod("calculateCCA", "SummarizedExperiment",
+setMethod("getCCA", "SummarizedExperiment",
     function(x, formula, variables, test.signif = TRUE,
              assay.type = assay_name, assay_name = exprs_values, exprs_values = "counts",
              scores = "wa", ...)
@@ -291,8 +324,15 @@ setMethod("calculateCCA", "SummarizedExperiment",
 
 #' @export
 #' @rdname runCCA
+#' @aliases getCCA
+calculateCCA <- function(x,...){
+    getCCA(x,...)
+}
+
+#' @export
+#' @rdname runCCA
 #' @importFrom SingleCellExperiment reducedDim<-
-setMethod("runCCA", "SingleCellExperiment",
+setMethod("addCCA", "SingleCellExperiment",
     function(x, formula, variables, altexp = NULL, name = "CCA", ...)
     {
         if (!is.null(altexp)) {
@@ -301,17 +341,25 @@ setMethod("runCCA", "SingleCellExperiment",
           y <- x
         }
         # Calculate CCA
-        cca <- calculateCCA(y, formula, variables, ...)
+        cca <- getCCA(y, formula, variables, ...)
         # Add object to reducedDim
         x <- .add_object_to_reduceddim(x, cca, name = name, ...)
         return(x)
     }
 )
 
+#' @export
+#' @rdname runCCA
+#' @aliases addCCA
+runCCA <- function(x,...){
+    addCCA(x,...)
+}
+
 #' @importFrom vegan sppscores<-
+#' @importFrom stats na.fail
 .calculate_rda <- function(
-        x, formula, variables, scores, method = distance, distance = "euclidean", ...){
-    .require_package("vegan")
+        x, formula, variables, scores, method = distance,
+        distance = "euclidean", na.action = na.fail, ...){
     #
     # Transpose and ensure that the table is in matrix format
     x <- as.matrix(t(x))
@@ -331,11 +379,21 @@ setMethod("runCCA", "SingleCellExperiment",
     if( !missing(variables) ){
         # Convert into data.frame
         variables <- as.data.frame(variables)
+        # Instead of letting na.action pass through, give informative error
+        # about missing values.
+        if( any(is.na(variables)) && isTRUE(all.equal(na.action, na.fail)) ){
+            stop("Variables contain missing values. Set na.action to ",
+                "na.exclude to remove samples with missing values.",
+                call. = FALSE)
+        }
+        
         # Calculate RDA with variables
-        rda <- vegan::dbrda(formula = form, data = variables, distance = method, ...)
+        rda <- vegan::dbrda(formula = form, data = variables, distance = method,
+                            na.action = na.action, ...)
     } else{
         # Otherwise calculate RDA without variables
-        rda <- vegan::dbrda(formula = form, distance = method, ...)
+        rda <- vegan::dbrda(formula = form, distance = method,
+                            na.action = na.action, ...)
     }
     # Get CCA
     if( !is.null(rda$CCA) ){
@@ -366,21 +424,22 @@ setMethod("runCCA", "SingleCellExperiment",
 
 # Add RDA/CCA to reducedDim
 .add_object_to_reduceddim <- function(
-        tse, rda, name, subset_result = FALSE, ...){
+        tse, rda, name, subset.result = TRUE, ...){
     # Test subset
-    if( !.is_a_bool(subset_result) ){
-        stop("'subset_result' must be TRUE or FALSE.", call. = FALSE)
+    if( !.is_a_bool(subset.result) ){
+        stop("'subset.result' must be TRUE or FALSE.", call. = FALSE)
     }
     #
     # If samples do not match / there were samples without appropriate metadata
     # and they are now removed
-    if( !all(colnames(tse) %in% rownames(rda)) && subset_result ){
+    if( !all(colnames(tse) %in% rownames(rda)) && subset.result ){
         # Take a subset
         tse <- tse[ , rownames(rda) ]
         # Give a message
-        message("Certain samples are removed from the result because they did ",
-                "not include sufficient metadata.")
-    } else if( !all(colnames(tse) %in% rownames(rda)) && !subset_result ){
+        warning(
+            "Certain samples are removed from the result because they did ",
+            "not include sufficient metadata.", call. = FALSE)
+    } else if( !all(colnames(tse) %in% rownames(rda)) && !subset.result ){
         # If user do not want to subset the data
         # Save attributes from the object
         attr <- attributes(rda)
@@ -397,7 +456,7 @@ setMethod("runCCA", "SingleCellExperiment",
         attr <- c(attributes(rda), attr)
         attributes(rda) <- attr
     }
-    # Add object to recucedDIm
+    # Add object to reducedDIm
     reducedDim(tse, name) <- rda
     return(tse)
 }
@@ -452,7 +511,7 @@ setMethod("runCCA", "SingleCellExperiment",
     # Get the dissimilarity matrix based on original dissimilarity index
     # provided by user. If the analysis is CCA, disable method; calculate
     # always euclidean distances because CCA is based on Euclidean distances.
-    if( length(class(rda)) == 1 && class(rda) == "cca" ){
+    if( length(class(rda)) == 1 && is(rda, 'cca') ){
         dist_mat <- vegdist(mat, method = "euclidean")
     } else{
         dist_mat <- vegdist(mat, method = method, ...)
@@ -548,14 +607,14 @@ setMethod("runCCA", "SingleCellExperiment",
 
 #' @export
 #' @rdname runCCA
-setMethod("calculateRDA", "ANY",
+setMethod("getRDA", "ANY",
       function(x, ...){
           .calculate_rda(x, ...)
       })
 
 #' @export
 #' @rdname runCCA
-setMethod("calculateRDA", "SummarizedExperiment",
+setMethod("getRDA", "SummarizedExperiment",
     function(x, formula, variables, test.signif = TRUE,
              assay.type = assay_name, assay_name = exprs_values, exprs_values = "counts",
              scores = "wa", ...)
@@ -597,8 +656,15 @@ setMethod("calculateRDA", "SummarizedExperiment",
 
 #' @export
 #' @rdname runCCA
+#' @aliases getRDA
+calculateRDA <- function(x,...){
+    getRDA(x,...)
+}
+
+#' @export
+#' @rdname runCCA
 #' @importFrom SingleCellExperiment reducedDim<-
-setMethod("runRDA", "SingleCellExperiment",
+setMethod("addRDA", "SingleCellExperiment",
     function(x, formula, variables, altexp = NULL, name = "RDA", ...)
     {
         if (!is.null(altexp)) {
@@ -607,9 +673,16 @@ setMethod("runRDA", "SingleCellExperiment",
           y <- x
         }
         # Calculate RDA
-        rda <- calculateRDA(y, formula, variables, ...)
+        rda <- getRDA(y, formula, variables, ...)
         # Add object to reducedDim
         x <- .add_object_to_reduceddim(x, rda, name = name, ...)
         return(x)
     }
 )
+
+#' @export
+#' @rdname runCCA
+#' @aliases addRDA
+runRDA <- function(x,...){
+    addRDA(x,...)
+}

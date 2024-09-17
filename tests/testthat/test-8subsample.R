@@ -1,13 +1,14 @@
-context("subsampleCounts")
-test_that("subsampleCounts", {
-    
+context("rarefyAssay")
+test_that("rarefyAssay", {
+    seed = 1938
+    set.seed(seed)
     data(GlobalPatterns, package="mia")
     
-    expect_warning(tse.subsampled <- subsampleCounts(GlobalPatterns, 
-                                                     min_size = 60000, 
-                                                     name = "subsampled",
-                                                     replace = TRUE,
-                                                     seed = 1938))
+    tse.subsampled <- rarefyAssay(
+        GlobalPatterns, 
+        sample = 60000,
+        name = "subsampled",
+        replace = TRUE)
     # check class 
     expect_s4_class(tse.subsampled, "TreeSummarizedExperiment")
     expect_equal(nrow(tse.subsampled), 12403)
@@ -35,11 +36,13 @@ test_that("subsampleCounts", {
     expect_equal(unname(colSums2(assay(tse.subsampled, "subsampled"))), expColSums)
     
     # When replace = FALSE
-    expect_warning(tse.subsampled.rp <- subsampleCounts(GlobalPatterns, 
-                                                        min_size = 60000, 
-                                                        name = "subsampled",
-                                                        replace = FALSE,
-                                                        seed = 1938))
+    seed = 1938
+    set.seed(seed)
+    tse.subsampled.rp <- rarefyAssay(
+        GlobalPatterns, 
+        sample = 60000, 
+        name = "subsampled",
+        replace = FALSE)
     
     # check number of features removed is correct
     expnFeaturesRemovedRp <- 6731

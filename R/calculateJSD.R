@@ -1,100 +1,3 @@
-#' Calculate the Jensen-Shannon Divergence
-#'
-#' This function calculates the Jensen-Shannon Divergence (JSD) in a
-#' \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
-#' object.
-#'
-#' @param x a numeric matrix or a
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}.
-#'   
-#' @param assay.type a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'
-#' @param exprs_values a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead.)
-#'   
-#' @param assay_name a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead. At some point \code{assay_name}
-#'   will be disabled.)
-#'
-#' @param transposed Logical scalar, is x transposed with cells in rows?
-#'
-#' @param BPPARAM A
-#'   \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}}
-#'   object specifying whether the JSD calculation should be parallelized.
-#'
-#' @param chunkSize an integer scalar, defining the size of data send
-#'   to the individual worker. Only has an effect, if \code{BPPARAM} defines
-#'   more than one worker. (default: \code{chunkSize = nrow(x)})
-#'
-#' @param ... optional arguments not used.
-#'
-#' @return a sample-by-sample distance matrix, suitable for NMDS, etc.
-#'
-#' @seealso
-#' \url{http://en.wikipedia.org/wiki/Jensen-Shannon_divergence}
-#'
-#' @references
-#' Jensen-Shannon Divergence and Hilbert space embedding.
-#' Bent Fuglede and Flemming Topsoe University of Copenhagen,
-#' Department of Mathematics
-#' \url{http://www.math.ku.dk/~topsoe/ISIT2004JSD.pdf}
-#'
-#' @name calculateJSD
-#'
-#' @author
-#' Susan Holmes \email{susan@@stat.stanford.edu}.
-#' Adapted for phyloseq by Paul J. McMurdie.
-#' Adapted for mia by Felix G.M. Ernst
-#'
-#' @export
-#'
-#' @examples
-#' data(enterotype)
-#' library(scater)
-#'
-#'
-#' jsd <- calculateJSD(enterotype)
-#' class(jsd)
-#' head(jsd)
-#'
-#' enterotype <- runMDS(enterotype, FUN = calculateJSD, name = "JSD",
-#'                      exprs_values = "counts")
-#' head(reducedDim(enterotype))
-#' head(attr(reducedDim(enterotype),"eig"))
-#' attr(reducedDim(enterotype),"GOF")
-NULL
-
-setGeneric("calculateJSD", signature = c("x"),
-           function(x, ...)
-             standardGeneric("calculateJSD"))
-
-#' @rdname calculateJSD
-#' @export
-setMethod("calculateJSD", signature = c(x = "ANY"),
-    function(x, ...){
-        .calculate_distance(x, FUN = runJSD, ...)
-    }
-)
-
-#' @rdname calculateJSD
-#'
-#' @importFrom SummarizedExperiment assay
-#'
-#' @export
-setMethod("calculateJSD", signature = c(x = "SummarizedExperiment"),
-    function(x, assay.type = assay_name, assay_name = exprs_values, 
-             exprs_values = "counts", transposed = FALSE, ...){
-        mat <- assay(x, assay.type)
-        if(!transposed){
-            mat <- t(mat)
-        }
-        calculateJSD(mat, ...)
-    }
-)
-
 # written by Susan Holmes \email{susan@@stat.stanford.edu}.
 # Adapted for phyloseq by Paul J. McMurdie.
 # Adapted for mia by Felix G.M. Ernst
@@ -116,15 +19,12 @@ setMethod("calculateJSD", signature = c(x = "SummarizedExperiment"),
     return(rowSums(d, na.rm = TRUE))
 }
 
-#' @rdname calculateJSD
-#'
 #' @importFrom utils combn
 #' @importFrom stats as.dist
 #' @importFrom BiocParallel SerialParam register bplapply bpisup bpstart bpstop
 #' @importFrom DelayedArray getAutoBPPARAM setAutoBPPARAM
-#'
-#' @export
-runJSD <- function(x, BPPARAM = SerialParam(), chunkSize = nrow(x)){
+#' 
+.get_jsd <- function(x, BPPARAM = SerialParam(), chunkSize = nrow(x), ...){
     # input check
     if(is.null(rownames(x))){
         rownames(x) <- seq_len(nrow(x))

@@ -1,7 +1,7 @@
 #' Converting a \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
 #' object into a long data.frame
 #'
-#' \code{meltAssay} Converts a
+#' \code{meltSE} Converts a
 #' \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}} object into a
 #' long data.frame which can be used for \code{tidyverse}-tools.
 #'
@@ -11,45 +11,44 @@
 #' \dQuote{SampleID_col} and \dQuote{FeatureID_row}, if row names or column
 #' names are set.
 #'
-#' @param x A numeric matrix or a
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
-#'   
-#' @param assay.type a \code{character} value to select an
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assayNames}}
-#'   
-#' @param assay_name a single \code{character} value for specifying which
-#'   assay to use for calculation.
-#'   (Please use \code{assay.type} instead. At some point \code{assay_name}
-#'   will be disabled.)
-#'
-#' @param add_col_data \code{NULL}, \code{TRUE} or a \code{character} vector to
+#' @inheritParams getDominant 
+#' @inheritParams getDissimilarity
+#' 
+#' @param add.col \code{Logical scalar}. \code{NULL} ,or \code{character vector}. Used to
 #'   select information from the \code{colData} to add to the molten assay data.
-#'   If \code{add_col_data = NULL} no data will be added, if
-#'   \code{add_col_data = TRUE} all data will be added and if
-#'   \code{add_col_data} is a \code{character} vector, it will be used to subset
-#'   to given column names in \code{colData}. (default:
-#'   \code{add_col_data = NULL})
+#'   If \code{add.col = NULL} no data will be added, if
+#'   \code{add.col = TRUE} all data will be added and if
+#'   \code{add.col} is a \code{character} vector, it will be used to subset
+#'   to given column names in \code{colData}. (Default: \code{NULL})
+#' 
+#' @param add_col_data Deprecated. Use \code{add.col} instead.
 #'
-#' @param add_row_data \code{NULL}, \code{TRUE} or a \code{character} vector to
+#' @param add.row \code{Logical scalar} or \code{Character vector}. To
 #'   select information from the \code{rowData} to add to the molten assay data.
-#'   If \code{add_row_data = NULL} no data will be added, if
-#'   \code{add_row_data = TRUE} all data will be added and if
-#'   \code{add_row_data} is a \code{character} vector, it will be used to subset
-#'   to given column names in \code{rowData}. (default:
-#'   \code{add_row_data = NULL})
+#'   If \code{add.row = NULL} no data will be added, if
+#'   \code{add.row = TRUE} all data will be added and if
+#'   \code{add.row} is a \code{character} vector, it will be used to subset
+#'   to given column names in \code{rowData}. (Default:
+#'   \code{NULL})
+#' 
+#' @param add_row_data Deprecated. Use \code{add.row} instead.
 #'
-#' @param feature_name a \code{character} scalar to use as the output's name
-#'   for the feature identifier. (default: \code{feature_name = "FeatureID"})
+#' @param row.name \code{Character scalar}. To use as the output's name
+#'   for the feature identifier. (Default: \code{"FeatureID"})
+#' 
+#' @param feature_name Deprecated. Use \code{row.name} instead.
 #'
-#' @param sample_name a \code{character} scalar to use as the output's name
-#'   for the sample identifier. (default: \code{sample_name = "SampleID"})
+#' @param col.name \code{Character scalar}. To use as the output's name
+#'   for the sample identifier. (Default: \code{"SampleID"})
+#' 
+#' @param sample_name Deprecated. Use \code{col.name} instead.
 #'
 #' @param ... optional arguments:
 #' \itemize{
-#'   \item{check_names}{ A boolean value passed to data.frame function's check.name
+#'   \item check_names: \code{Logical scalar}. Passed to data.frame function's check.name
 #'   argument. Determines if sample names are checked that they are syntactically 
 #'   valid variable names and are not duplicated. If they are not, sample names 
-#'   are modified. (default: \code{check_names = TRUE})}
+#'   are modified. (Default: \code{TRUE})
 #' }
 #'
 #' @return A \code{tibble} with the molten data. The assay values are given in a
@@ -57,77 +56,79 @@
 #' column \dQuote{FeatureID} will contain the rownames, if set, and analogously
 #' a column \dQuote{SampleID} with the colnames, if set
 #'
-#' @name meltAssay
+#' @name meltSE
 
-#' @author
-#' Sudarshan A. Shetty
 #'
 #' @examples
 #' data(GlobalPatterns)
-#' molten_tse <- meltAssay(GlobalPatterns,
+#' molten_tse <- meltSE(GlobalPatterns,
 #'                         assay.type = "counts",
-#'                         add_row_data = TRUE,
-#'                         add_col_data = TRUE
+#'                         add.row = TRUE,
+#'                         add.col = TRUE
 #'                         )
 #' molten_tse
 NULL
 
-#' @rdname meltAssay
+#' @rdname meltSE
 #' @export
-setGeneric("meltAssay",
+setGeneric("meltSE",
            signature = "x",
            function(x,
                     assay.type = assay_name, assay_name = "counts",
+                    add.row = add_row_data,
                     add_row_data = NULL,
+                    add.col = add_col_data,
                     add_col_data = NULL,
+                    row.name = feature_name,
                     feature_name = "FeatureID",
+                    col.name = sample_name,
                     sample_name = "SampleID",
                     ...)
-               standardGeneric("meltAssay")
+               standardGeneric("meltSE")
 )
 
-.norm_add_row_data <- function(add_row_data, x, feature_name){
-    if(is.null(add_row_data)){
+.norm_add_row_data <- function(add.row, x, row.name){
+    if(is.null(add.row)){
         return(NULL)
     }
-    if(anyNA(add_row_data)){
-        stop("'add_row_data' contains NA.", call. = FALSE)
+    if(anyNA(add.row)){
+        stop("'add.row' contains NA.", call. = FALSE)
     }
     cn <- colnames(rowData(x))
-    if(is.logical(add_row_data) && length(add_row_data) == 1L && add_row_data){
-        add_row_data <- cn
-    } else if (isFALSE(all(add_row_data %in% cn))) {
-        stop("Please provide valid column names with 'add_row_data' matching ",
+    if(is.logical(add.row) && length(add.row) == 1L && add.row){
+        add.row <- cn
+    } else if (isFALSE(all(add.row %in% cn))) {
+        stop("Please provide valid column names with 'add.row' matching ",
              "those in 'rowData(x)'", call. = FALSE)
     }
-    if(!is.null(rownames(x)) && feature_name %in% add_row_data){
-        warning("'x' contains a column '",feature_name,"' in its ",
+    if(!is.null(rownames(x)) && row.name %in% add.row){
+        warning("'x' contains a column '",row.name,"' in its ",
                 "rowData(), which will ",
-                "be renamed to '",feature_name,"_row'", call. = FALSE)
+                "be renamed to '",row.name,"_row'", call. = FALSE)
     }
-    add_row_data
+    return(add.row)
 }
 
-.norm_add_col_data <- function(add_col_data, x, sample_name){
-    if(is.null(add_col_data)){
+.norm_add_col_data <- function(add.col, x, col.name){
+    if(is.null(add.col)){
         return(NULL)
     }
-    if(anyNA(add_col_data)){
-        stop("'add_col_data' contains NA.", call. = FALSE)
+    if(anyNA(add.col)){
+        stop("'add.col' contains NA.", call. = FALSE)
     }
     cn <- colnames(colData(x))
-    if(is.logical(add_col_data) && length(add_col_data) == 1L && add_col_data){
-        add_col_data <- cn
-    } else if (isFALSE(all(add_col_data %in% cn))) {
-        stop("Please provide valid column names with 'add_col_data' matching ",
+    if(is.logical(add.col) && length(add.col) == 1L && add.col){
+        add.col <- cn
+    } else if (isFALSE(all(add.col %in% cn))) {
+        stop("Please provide valid column names with 'add.col' matching ",
              "those in 'colData(x)'", call. = FALSE)
     }
-    if(!is.null(colnames(x)) && sample_name %in% add_col_data){
-        warning("'x' contains a column '",sample_name,"' in its ",
+    if(!is.null(colnames(x)) && col.name %in% add.col){
+        warning("'x' contains a column '",col.name,"' in its ",
                 "colData(), which will ",
-                "be renamed to '",sample_name,"_col'", call. = FALSE)
+                "be renamed to '",col.name,"_col'", call. = FALSE)
     }
-    add_col_data
+    return(add.col)
 }
 
 .col_switch_name <- function(name){
@@ -140,49 +141,51 @@ setGeneric("meltAssay",
 
 #' @importFrom dplyr mutate select
 .format_molten_assay <- function(molten_assay, x,
-                                 feature_name,
-                                 sample_name){
+                                 row.name,
+                                 col.name){
     if(is.null(rownames(x)) &&
-       .row_switch_name(feature_name) %in% colnames(molten_assay) &&
-       !anyNA(molten_assay[,.row_switch_name(feature_name)]) &&
-       !anyDuplicated(rowData(x)[,feature_name])){
+       .row_switch_name(row.name) %in% colnames(molten_assay) &&
+       !anyNA(molten_assay[,.row_switch_name(row.name)]) &&
+       !anyDuplicated(rowData(x)[,row.name])){
         molten_assay <- molten_assay %>%
-            select(!sym(feature_name)) %>%
-            dplyr::rename(!!sym(feature_name) := !!sym(.row_switch_name(feature_name)))
+            select(!sym(row.name)) %>%
+            dplyr::rename(!!sym(row.name) := !!sym(.row_switch_name(row.name)))
     }
     if(is.null(colnames(x)) &&
-       .col_switch_name(sample_name) %in% colnames(molten_assay) &&
-       !anyNA(molten_assay[,.col_switch_name(sample_name)]) &&
-       !anyDuplicated(colData(x)[,sample_name])){
+       .col_switch_name(col.name) %in% colnames(molten_assay) &&
+       !anyNA(molten_assay[,.col_switch_name(col.name)]) &&
+       !anyDuplicated(colData(x)[,col.name])){
         molten_assay %>%
-            select(!sym(sample_name)) %>%
-            dplyr::rename(!!sym(sample_name) := !!sym(.col_switch_name(sample_name)))
+            select(!sym(col.name)) %>%
+            dplyr::rename(!!sym(col.name) := !!sym(.col_switch_name(col.name)))
     }
     molten_assay %>%
-        mutate(!!sym(feature_name) := factor(!!sym(feature_name)),
-               !!sym(sample_name) := factor(!!sym(sample_name)))
+        mutate(!!sym(row.name) := factor(!!sym(row.name)),
+               !!sym(col.name) := factor(!!sym(col.name)))
 }
 
 
-#' @rdname meltAssay
+#' @rdname meltSE
 #'
 #' @export
-setMethod("meltAssay", signature = c(x = "SummarizedExperiment"),
+setMethod("meltSE", signature = c(x = "SummarizedExperiment"),
     function(x,
-             assay.type = assay_name, assay_name = "counts", 
-             add_row_data = NULL,
-             add_col_data = NULL,
-             feature_name = "FeatureID",
-             sample_name = "SampleID",
-             ...) {
+            assay.type = assay_name, assay_name = "counts", 
+            add.row = NULL,
+            add.col = NULL,
+            row.name = feature_name,
+            feature_name = "FeatureID",
+            col.name = sample_name,
+            sample_name = "SampleID",
+            ...) {
         # input check
         .check_assay_present(assay.type, x)
-        if(!.is_a_string(feature_name)){
-            stop("'feature_name' must be a single non-empty character value.",
+        if(!.is_a_string(row.name)){
+            stop("'row.name' must be a single non-empty character value.",
                  call. = FALSE)
         }
-        if(!.is_a_string(sample_name)){
-            stop("'sample_name' must be a single non-empty character value.",
+        if(!.is_a_string(col.name)){
+            stop("'col.name' must be a single non-empty character value.",
                  call. = FALSE)
         }
         # check if rownames are duplicated, and if they are, modify
@@ -193,20 +196,20 @@ setMethod("meltAssay", signature = c(x = "SummarizedExperiment"),
                     call. = FALSE)
         }
         # check selected colnames
-        add_row_data <- .norm_add_row_data(add_row_data, x, feature_name)
-        add_col_data <- .norm_add_col_data(add_col_data, x, sample_name)
-        molten_assay <- .melt_assay(x, assay.type, feature_name, sample_name, ...)
-        if(!is.null(add_row_data)){
+        add.row <- .norm_add_row_data(add.row, x, row.name)
+        add.col <- .norm_add_col_data(add.col, x, col.name)
+        molten_assay <- .melt_assay(x, assay.type, row.name, col.name, ...)
+        if(!is.null(add.row)){
             molten_assay <-
-                .add_row_data_to_molten_assay(molten_assay, x, add_row_data,
-                                              feature_name)
+                .add_row_data_to_molten_assay(molten_assay, x, add.row,
+                                              row.name)
         }
-        if(!is.null(add_col_data)){
+        if(!is.null(add.col)){
             molten_assay <-
-                .add_col_data_to_molten_assay(molten_assay, x, add_col_data,
-                                              sample_name, ...)
+                .add_col_data_to_molten_assay(molten_assay, x, add.col,
+                                              col.name, ...)
         }
-        .format_molten_assay(molten_assay, x, feature_name, sample_name)
+        .format_molten_assay(molten_assay, x, row.name, col.name)
     }
 )
 
@@ -215,18 +218,19 @@ setMethod("meltAssay", signature = c(x = "SummarizedExperiment"),
 #' @importFrom tibble rownames_to_column
 #' @importFrom tidyr pivot_longer
 #' @importFrom rlang sym
-.melt_assay <- function(x, assay.type, feature_name, sample_name, check_names = FALSE,...) {
+.melt_assay <- function(x, assay.type, row.name, col.name, 
+    check.names = check_names, check_names = FALSE,...) {
     mat <- assay(x, assay.type) %>%
         as.matrix() 
     rownames(mat) <- rownames(x)
     colnames(mat) <- colnames(x)
     mat %>%
-        data.frame(check.names = check_names) %>%
-        rownames_to_column(feature_name) %>%
+        data.frame(check.names = check.names) %>%
+        rownames_to_column(row.name) %>%
         # SampleID is unique sample id
-        pivot_longer(!sym(feature_name),
+        pivot_longer(!sym(row.name),
                      values_to = assay.type,
-                     names_to = sample_name)
+                     names_to = col.name)
 }
 
 # Combines molten assay with rowData i.e. taxonomy table.
@@ -234,18 +238,18 @@ setMethod("meltAssay", signature = c(x = "SummarizedExperiment"),
 #' @importFrom rlang sym
 #' @importFrom tibble rownames_to_column
 #' @importFrom dplyr rename
-.add_row_data_to_molten_assay <- function(molten_assay, x, add_row_data,
-                                          feature_name) {
-    rd <- SummarizedExperiment::rowData(x)[,add_row_data,drop=FALSE] %>%
+.add_row_data_to_molten_assay <- function(molten_assay, x, add.row,
+                                          row.name) {
+    rd <- SummarizedExperiment::rowData(x)[,add.row,drop=FALSE] %>%
         data.frame()
-    if(feature_name %in% add_row_data){
+    if(row.name %in% add.row){
         rd <- rd %>%
-            dplyr::rename(!!sym(.row_switch_name(feature_name)) := !!sym(feature_name))
+            dplyr::rename(!!sym(.row_switch_name(row.name)) := !!sym(row.name))
     }
     rd <- rd %>%
-        rownames_to_column(feature_name)
+        rownames_to_column(row.name)
     molten_assay %>%
-        dplyr::left_join(rd, by = feature_name)
+        dplyr::left_join(rd, by = row.name)
 }
 
 # Combines molten assay and rowData i.e. taxonomy table with
@@ -253,20 +257,20 @@ setMethod("meltAssay", signature = c(x = "SummarizedExperiment"),
 #' @importFrom rlang sym
 #' @importFrom tibble rownames_to_column
 #' @importFrom dplyr rename
-.add_col_data_to_molten_assay <- function(molten_assay, x, add_col_data,
-                                          sample_name, check_names = FALSE,...) {
-    cd <- SummarizedExperiment::colData(x)[,add_col_data,drop=FALSE] %>%
+.add_col_data_to_molten_assay <- function(molten_assay, x, add.col,
+    col.name, check.names = check_names, check_names = FALSE,...) {
+    cd <- SummarizedExperiment::colData(x)[,add.col,drop=FALSE] %>%
         data.frame()
     # This makes sure that sample names match
-    if(check_names == TRUE){
+    if(check.names){
         rownames(cd) <- make.names(rownames(cd))
     }
-    if(sample_name %in% add_col_data){
+    if(col.name %in% add.col){
         cd <- cd %>%
-            dplyr::rename(!!sym(.col_switch_name(sample_name)) := !!sym(sample_name))
+            dplyr::rename(!!sym(.col_switch_name(col.name)) := !!sym(col.name))
     }
     cd <- cd %>%
-        rownames_to_column(sample_name)
+        rownames_to_column(col.name)
     molten_assay %>%
-        dplyr::left_join(cd, by = sample_name)
+        dplyr::left_join(cd, by = col.name)
 }

@@ -6,9 +6,16 @@
 #' @param x A
 #'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
 #'   object.
+#' 
+#' @param by \code{Character scalar}. Determines if association is calculated
+#'   row-wise / for features ('rows') or column-wise / for samples ('cols').
+#'   Must be \code{'rows'} or \code{'cols'}.
 #'   
-#' @param clust.col A single character value indicating the name of the 
+#' @param MARGIN Deprecated. Use \code{by} instead.
+#'   
+#' @param clust.col \code{Character scalar}. Indicates the name of the 
 #'   \code{rowData} (or \code{colData}) where the data will be stored.
+#'   (Default: \code{"clusters"})
 #'   
 #' @param ... Additional parameters to use altExps for example
 #' @inheritParams bluster::clusterRows
@@ -27,14 +34,12 @@
 #' By default, clustering is done on the features.
 #'
 #' @return
-#' \code{cluster} returns an object of the same type as the \code{x} parameter 
+#' \code{addCluster} returns an object of the same type as the \code{x} parameter 
 #' with clustering information named \code{clusters} stored in \code{colData} 
 #' or \code{rowData}. 
 #'
-#' @name cluster
+#' @name addCluster
 #' @export
-#' 
-#' @author Basil Courbayre
 #'
 #' @examples
 #' library(bluster)
@@ -42,11 +47,11 @@
 #' tse <- GlobalPatterns
 #'
 #' # Cluster on rows using Kmeans
-#' tse <- cluster(tse, KmeansParam(centers = 3))
+#' tse <- addCluster(tse, KmeansParam(centers = 3))
 #' 
 #' # Clustering done on the samples using Hclust
-#' tse <- cluster(tse, 
-#'                MARGIN = "samples", 
+#' tse <- addCluster(tse, 
+#'                by = "samples", 
 #'                HclustParam(metric = "bray", dist.fun = vegan::vegdist))
 #' 
 #' # Getting the clusters
@@ -54,26 +59,27 @@
 #' 
 NULL
 
-#' @rdname cluster
+#' @rdname addCluster
 #' @export
-setGeneric("cluster", signature = c("x"),
+setGeneric("addCluster", signature = c("x"),
     function(
             x, BLUSPARAM, assay.type = assay_name, 
-            assay_name = "counts", MARGIN = "features", full = FALSE, 
+            assay_name = "counts", by = MARGIN, MARGIN = "rows", full = FALSE, 
             name = "clusters", clust.col = "clusters", ...)
-    standardGeneric("cluster"))
+    standardGeneric("addCluster"))
 
-#' @rdname cluster
+
+#' @rdname addCluster
 #' @export
 #' @importFrom bluster clusterRows
-setMethod("cluster", signature = c(x = "SummarizedExperiment"),
+setMethod("addCluster", signature = c(x = "SummarizedExperiment"),
     function(
             x, BLUSPARAM, assay.type = assay_name, 
-            assay_name = "counts", MARGIN = "features", full = FALSE, 
+            assay_name = "counts", by = MARGIN, MARGIN = "rows", full = FALSE, 
             name = "clusters", clust.col = "clusters", ...) {
         .require_package("bluster")
         # Checking parameters
-        MARGIN <- .check_MARGIN(MARGIN)
+        by <- .check_MARGIN(by)
         se <- .check_and_get_altExp(x, ...)
         .check_assay_present(assay.type, se)
         if( !.is_a_string(name) ){
@@ -91,7 +97,7 @@ setMethod("cluster", signature = c(x = "SummarizedExperiment"),
         # Get assay
         mat <- assay(se, assay.type)
         # Transpose if clustering on the columns
-        if(MARGIN == 2){
+        if(by == 2){
             mat <- t(mat)
         }
         # Get clusters
@@ -108,7 +114,7 @@ setMethod("cluster", signature = c(x = "SummarizedExperiment"),
         # list
         clusters <- list(clusters)
         x <- .add_values_to_colData(
-            x, clusters, clust.col, MARGIN = MARGIN, colname = "clust.col", ...)
+            x, clusters, clust.col, MARGIN = by, colname = "clust.col", ...)
         return(x)
     }
 )

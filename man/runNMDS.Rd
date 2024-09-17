@@ -2,29 +2,33 @@
 % Please edit documentation in R/runNMDS.R
 \name{runNMDS}
 \alias{runNMDS}
+\alias{getNMDS}
+\alias{getNMDS,ANY-method}
+\alias{getNMDS,SummarizedExperiment-method}
+\alias{getNMDS,SingleCellExperiment-method}
 \alias{calculateNMDS}
-\alias{calculateNMDS,ANY-method}
-\alias{calculateNMDS,SummarizedExperiment-method}
-\alias{calculateNMDS,SingleCellExperiment-method}
-\alias{plotNMDS}
+\alias{addNMDS}
 \title{Perform non-metric MDS on sample-level data}
 \usage{
-calculateNMDS(x, ...)
+getNMDS(x, ...)
 
-\S4method{calculateNMDS}{ANY}(
+\S4method{getNMDS}{ANY}(
   x,
   FUN = vegdist,
+  nmds.fun = nmdsFUN,
   nmdsFUN = c("isoMDS", "monoMDS"),
   ncomponents = 2,
   ntop = 500,
+  subset.row = subset_row,
   subset_row = NULL,
   scale = FALSE,
   transposed = FALSE,
+  keep.dist = keep_dist,
   keep_dist = FALSE,
   ...
 )
 
-\S4method{calculateNMDS}{SummarizedExperiment}(
+\S4method{getNMDS}{SummarizedExperiment}(
   x,
   ...,
   assay.type = assay_name,
@@ -33,83 +37,89 @@ calculateNMDS(x, ...)
   FUN = vegdist
 )
 
-\S4method{calculateNMDS}{SingleCellExperiment}(
+\S4method{getNMDS}{SingleCellExperiment}(
   x,
   ...,
   assay.type = assay_name,
   assay_name = exprs_values,
   exprs_values = "counts",
   dimred = NULL,
+  ndimred = n_dimred,
   n_dimred = NULL,
   FUN = vegdist
 )
 
-runNMDS(x, ..., altexp = NULL, name = "NMDS")
+calculateNMDS(x, ...)
 
-plotNMDS(x, ..., ncomponents = 2)
+addNMDS(x, ..., altexp = NULL, name = "NMDS")
+
+runNMDS(x, ...)
 }
 \arguments{
-\item{x}{For \code{calculateNMDS}, a numeric matrix of expression values
-where rows are features and columns are cells.
-Alternatively, a \code{TreeSummarizedExperiment} containing such a matrix.
-
-For \code{runNMDS} a \linkS4class{SingleCellExperiment}}
+\item{x}{\code{\link[TreeSummarizedExperiment:TreeSummarizedExperiment-class]{TreeSummarizedExperiment}}.}
 
 \item{...}{additional arguments to pass to \code{FUN} and
-\code{nmdsFUN}.}
+\code{nmds.fun}.}
 
-\item{FUN}{a \code{function} or \code{character} value with a function
+\item{FUN}{\code{Function} or \code{Character scalar}. A value with a function
 name returning a \code{\link[stats:dist]{dist}} object}
 
-\item{nmdsFUN}{a \code{character} value to choose the scaling
+\item{nmds.fun}{\code{Character scalar}. A value to choose the scaling
 implementation, either \dQuote{isoMDS} for
 \code{\link[MASS:isoMDS]{MASS::isoMDS}} or \dQuote{monoMDS} for
 \code{\link[vegan:monoMDS]{vegan::monoMDS}}}
 
-\item{ncomponents}{Numeric scalar indicating the number of NMDS dimensions
-to obtain.}
+\item{nmdsFUN}{Deprecated. Use \code{nmds.fun} instead.}
 
-\item{ntop}{Numeric scalar specifying the number of features with the highest
-variances to use for dimensionality reduction.}
+\item{ncomponents}{\code{Numeric scalar}. Indicates the number of DPCoA dimensions
+to obtain. (Default: \code{2})}
 
-\item{subset_row}{Vector specifying the subset of features to use for
+\item{ntop}{\code{Numeric scalar}. Specifies the number of features with the highest
+variances to use for dimensionality reduction. Alternatively \code{NULL},
+if all features should be used. (Default: \code{NULL})}
+
+\item{subset.row}{\code{Character Vector}. Specifies the subset of features to use for
 dimensionality reduction. This can be a character vector of row names, an
-integer vector of row indices or a logical vector.}
+integer vector of row indices or a logical vector. (Default: \code{NULL})}
 
-\item{scale}{Logical scalar, should the expression values be standardized?}
+\item{subset_row}{Deprecated. Use \code{subset.row} instead.}
 
-\item{transposed}{Logical scalar, is x transposed with cells in rows?}
+\item{scale}{\code{Logical scalar}. Should the expression values be standardized?
+(Default: \code{FALSE})}
 
-\item{keep_dist}{Logical scalar indicating whether the \code{dist} object
+\item{transposed}{\code{Logical scalar}. Specifies if x is transposed with
+cells in rows. (Default: \code{FALSE})}
+
+\item{keep.dist}{\code{Logical scalar}. Indicates whether the \code{dist} object
 calculated by \code{FUN} should be stored as \sQuote{dist} attribute of
-the matrix returned/stored by \code{calculateNMDS}/ \code{runNMDS}.}
+the matrix returned/stored by \code{getNMDS}/ \code{addNMDS}. (Default:
+\code{FALSE})}
 
-\item{assay.type}{a single \code{character} value for specifying which
-assay to use for calculation.}
+\item{keep_dist}{Deprecated. Use \code{keep.dist} instead.}
 
-\item{assay_name}{a single \code{character} value for specifying which
-assay to use for calculation.
-(Please use \code{assay.type} instead. At some point \code{assay_name}
-will be disabled.)}
+\item{assay.type}{\code{Character scalar}. Specifies which assay to use for
+calculation. (Default: \code{"counts"})}
 
-\item{exprs_values}{a single \code{character} value for specifying which
-assay to use for calculation.
-(Please use \code{assay.type} instead.)}
+\item{assay_name}{Deprecated. Use \code{assay.type} instead.}
 
-\item{dimred}{String or integer scalar specifying the existing dimensionality
+\item{exprs_values}{Deprecated. Use \code{assay.type} instead.}
+
+\item{dimred}{\code{Character scalar} or \code{integer scalar}. Specifies the existing dimensionality
 reduction results to use.}
 
-\item{n_dimred}{Integer scalar or vector specifying the dimensions to use if
+\item{ndimred}{\code{integer vector}. Specifies the dimensions to use if
 dimred is specified.}
 
-\item{altexp}{String or integer scalar specifying an alternative experiment
-containing the input data.}
+\item{n_dimred}{Deprecated. Use \code{ndimred} instead.}
 
-\item{name}{String specifying the name to be used to store the result in the
-reducedDims of the output.}
+\item{altexp}{\code{Character scalar} or \code{integer scalar}. Specifies an
+alternative experiment containing the input data. (Default: \code{NULL})}
+
+\item{name}{\code{Character scalar}. A name for the column of the
+\code{colData} where results will be stored. (Default: \code{"NMDS"})}
 }
 \value{
-For \code{calculateNMDS}, a matrix is returned containing the MDS
+For \code{getNMDS}, a matrix is returned containing the MDS
 coordinates for each sample (row) and dimension (column).
 }
 \description{
@@ -117,10 +127,12 @@ Perform non-metric multi-dimensional scaling (nMDS) on samples, based on the
 data in a \code{SingleCellExperiment} object.
 }
 \details{
+For \code{addNMDS} a \linkS4class{SingleCellExperiment}
+
 Either \code{\link[MASS:isoMDS]{MASS::isoMDS}} or
 \code{\link[vegan:monoMDS]{vegan::monoMDS}} are used internally to compute
 the NMDS components. If you supply a custom \code{FUN}, make sure that
-the arguments of \code{FUN} and \code{nmdsFUN} do not collide.
+the arguments of \code{FUN} and \code{nmds.fun} do not collide.
 }
 \examples{
 # generate some example data
@@ -129,12 +141,12 @@ df <- DataFrame(n = c(1:6))
 tse <- TreeSummarizedExperiment(assays = list(counts = mat),
                                 rowData = df)
 #
-calculateNMDS(tse)
+getNMDS(tse)
 
 #
 data(esophagus)
-esophagus <- runNMDS(esophagus, FUN = vegan::vegdist, name = "BC")
-esophagus <- runNMDS(esophagus, FUN = vegan::vegdist, name = "euclidean",
+esophagus <- addNMDS(esophagus, FUN = vegan::vegdist, name = "BC")
+esophagus <- addNMDS(esophagus, FUN = vegan::vegdist, name = "euclidean",
                      method = "euclidean")
 reducedDims(esophagus)
 }
@@ -145,7 +157,4 @@ for NMDS component calculation.
 
 \code{\link[scater:plotReducedDim]{plotMDS}}, to quickly visualize the
 results.
-}
-\author{
-Felix Ernst
 }

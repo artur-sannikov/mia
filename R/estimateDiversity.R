@@ -9,8 +9,9 @@
 #' \sQuote{Inverse Simpson}, \sQuote{log-modulo skewness}, and \sQuote{Shannon} 
 #' indices. See details for more information and references.
 #'
-#' @param x a \code{\link{SummarizedExperiment}} object or \code{\link{TreeSummarizedExperiment}}.
-#' The latter is recommended for microbiome data sets and tree-based alpha diversity indices.
+#' @param x a \code{\link{SummarizedExperiment}} object or
+#'   \code{\link{TreeSummarizedExperiment}}. The latter is recommended for
+#'   microbiome data sets and tree-based alpha diversity indices.
 #' 
 #' @param tree A phylogenetic tree that is used to calculate 'faith' index.
 #'   If \code{x} is a \code{TreeSummarizedExperiment}, \code{rowTree(x)} is 
@@ -31,14 +32,18 @@
 #'   stored in. By default this will use the original names of the calculated
 #'   indices.
 #'   
-#' @param tree_name a single \code{character} value for specifying which
+#' @param tree.name a single \code{character} value for specifying which
 #'   rowTree will be used to calculate faith index. 
-#'   (By default: \code{tree_name = "phylo"})
+#'   (By default: \code{tree.name = "phylo"})
+#' 
+#' @param tree_name Deprecated. Use \code{tree.name} instead.
 #'   
-#' @param node_lab NULL or a character vector specifying the links between rows and 
+#' @param node.label NULL or a character vector specifying the links between rows and 
 #'   node labels of \code{tree}. If a certain row is not linked with the tree, missing 
 #'   instance should be noted as NA. When NULL, all the rownames should be found from
-#'   the tree. (By default: \code{node_lab = NULL})
+#'   the tree. (By default: \code{node.label = NULL})
+#' 
+#' @param node_lab Deprecated. Use \code{node.label} instead.
 #'
 #' @param BPPARAM A
 #'   \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}}
@@ -46,39 +51,40 @@
 #'
 #' @param ... optional arguments:
 #' \itemize{
-#'   \item{threshold}{ A numeric value in the unit interval,
+#'   \item threshold: A numeric value in the unit interval,
 #'   determining the threshold for coverage index. By default,
-#'   \code{threshold} is 0.9.}
-#'   \item{quantile}{ Arithmetic abundance classes are evenly cut up to to
+#'   \code{threshold} is 0.9.
+#'   \item quantile: Arithmetic abundance classes are evenly cut up to to
 #'   this quantile of the data. The assumption is that abundances higher than
 #'   this are not common, and they are classified in their own group.
-#'   By default, \code{quantile} is 0.5.}
-#'   \item{num_of_classes}{ The number of arithmetic abundance classes
+#'   By default, \code{quantile} is 0.5.
+#'   \item nclasses: The number of arithmetic abundance classes
 #'   from zero to the quantile cutoff indicated by \code{quantile}. 
-#'   By default, \code{num_of_classes} is 50.}
-#'   \item{only.tips}{ A boolean value specifying whether to remove internal
-#'   nodes when Faith's inex is calculated. When \code{only.tips=TRUE}, those
+#'   By default, \code{nclasses} is 50.
+#'   \item num_of_classes Deprecated. Use \code{nclasses} instead.
+#'   \item only.tips: A boolean value specifying whether to remove internal
+#'   nodes when Faith's index is calculated. When \code{only.tips=TRUE}, those
 #'   rows that are not tips of tree are removed.
-#'   (By default: \code{only.tips=FALSE})}
+#'   (By default: \code{only.tips=FALSE})
 #' }
 #'
 #' @return \code{x} with additional \code{\link{colData}} named \code{*name*}
 #'
 #' @details
 #'
-#' Alpha diversity is a joint quantity that combines elements or community richness
-#' and evenness. Diversity increases, in general, when species richness or
-#' evenness increase.
+#' Alpha diversity is a joint quantity that combines elements or community
+#' richness and evenness. Diversity increases, in general, when species richness
+#' or evenness increase.
 #'
 #' By default, this function returns all indices.
 #'
 #' \itemize{
 #' 
-#' \item{'coverage' }{Number of species needed to cover a given fraction of
+#' \item 'coverage': Number of species needed to cover a given fraction of
 #' the ecosystem (50 percent by default). Tune this with the threshold
-#' argument.}
+#' argument.
 #' 
-#' \item{'faith' }{Faith's phylogenetic alpha diversity index measures how
+#' \item 'faith': Faith's phylogenetic alpha diversity index measures how
 #' long the taxonomic distance is between taxa that are present in the sample.
 #' Larger values represent higher diversity. Using this index requires
 #' rowTree. (Faith 1992)
@@ -87,12 +93,12 @@
 #' internal nodes, there are two options. First, you can keep those features,
 #' and prune the tree to match features so that each tip can be found from
 #' the features. Other option is to remove all features that are not tips.
-#' (See \code{only.tips} parameter)}
+#' (See \code{only.tips} parameter)
 #' 
-#' \item{'fisher' }{Fisher's alpha; as implemented in
-#' \code{\link[vegan:diversity]{vegan::fisher.alpha}}. (Fisher et al. 1943)}
+#' \item 'fisher': Fisher's alpha; as implemented in
+#' \code{\link[vegan:diversity]{vegan::fisher.alpha}}. (Fisher et al. 1943)
 #' 
-#' \item{'gini_simpson' }{Gini-Simpson diversity i.e. \eqn{1 - lambda},
+#' \item 'gini_simpson': Gini-Simpson diversity i.e. \eqn{1 - lambda},
 #' where \eqn{lambda} is the
 #' Simpson index, calculated as the sum of squared relative abundances.
 #' This corresponds to the diversity index
@@ -101,25 +107,25 @@
 #' psychology and management studies. The Gini-Simpson index (1-lambda)
 #' should not be
 #' confused with Simpson's dominance (lambda), Gini index, or
-#' inverse Simpson index (1/lambda).}
+#' inverse Simpson index (1/lambda).
 #' 
-#' \item{'inverse_simpson' }{Inverse Simpson diversity:
+#' \item 'inverse_simpson': Inverse Simpson diversity:
 #' \eqn{1/lambda} where \eqn{lambda=sum(p^2)} and p refers to relative
 #' abundances.
 #' This corresponds to the diversity index
 #' 'invsimpson' in vegan::diversity. Don't confuse this with the
-#' closely related Gini-Simpson index}
+#' closely related Gini-Simpson index
 #'
-#' \item{'log_modulo_skewness' }{The rarity index characterizes the
+#' \item 'log_modulo_skewness': The rarity index characterizes the
 #' concentration of species at low abundance. Here, we use the skewness of
 #' the frequency 
 #' distribution of arithmetic abundance classes (see Magurran & McGill 2011).
 #' These are typically right-skewed; to avoid taking log of occasional
 #' negative skews, we follow Locey & Lennon (2016) and use the log-modulo
 #' transformation that adds a value of one to each measure of skewness to
-#' allow logarithmization.}
+#' allow logarithmization.
 #'
-#' \item{'shannon' }{Shannon diversity (entropy).}
+#' \item 'shannon': Shannon diversity (entropy).
 #' 
 #' }
 #'
@@ -158,17 +164,15 @@
 #' @seealso
 #' \code{\link[scater:plotColData]{plotColData}}
 #' \itemize{
-#'   \item{\code{\link[mia:estimateRichness]{estimateRichness}}}
-#'   \item{\code{\link[mia:estimateEvenness]{estimateEvenness}}}
-#'   \item{\code{\link[mia:estimateDominance]{estimateDominance}}}
-#'   \item{\code{\link[vegan:diversity]{diversity}}}
-#'   \item{\code{\link[vegan:specpool]{estimateR}}}
+#'   \item \code{\link[mia:estimateRichness]{estimateRichness}}
+#'   \item \code{\link[mia:estimateEvenness]{estimateEvenness}}
+#'   \item \code{\link[mia:estimateDominance]{estimateDominance}}
+#'   \item \code{\link[vegan:diversity]{diversity}}
+#'   \item \code{\link[vegan:specpool]{estimateR}}
 #' }
 #'
-#' @name estimateDiversity
-#' @export
-#'
-#' @author Leo Lahti and Tuomas Borman. Contact: \url{microbiome.github.io}
+#' @name .estimate_diversity
+#' @noRd
 #' 
 #' @examples
 #' data(GlobalPatterns)
@@ -183,7 +187,7 @@
 #' "Faith",  "LogModSkewness")
 #'
 #' # Calculate diversities
-#' tse <- estimateDiversity(tse, index = index)
+#' tse <- .estimate_diversity(tse, index = index)
 #'
 #' # The colData contains the indices with their code names by default
 #' colData(tse)[, index]
@@ -192,19 +196,18 @@
 #' colData(tse)[, index] <- NULL
 #' 
 #' # 'threshold' can be used to determine threshold for 'coverage' index
-#' tse <- estimateDiversity(tse, index = "coverage", threshold = 0.75)
-#' # 'quantile' and 'num_of_classes' can be used when
+#' tse <- .estimate_diversity(tse, index = "coverage", threshold = 0.75)
+#' # 'quantile' and 'nclasses' can be used when
 #' # 'log_modulo_skewness' is calculated
-#' tse <- estimateDiversity(tse, index = "log_modulo_skewness",
-#'        quantile = 0.75, num_of_classes = 100)
+#' tse <- .estimate_diversity(tse, index = "log_modulo_skewness",
+#'        quantile = 0.75, nclasses = 100)
 #'
 #' # It is recommended to specify also the final names used in the output.
-#' tse <- estimateDiversity(tse,
-#'   index = c("shannon", "gini_simpson", "inverse_simpson", "coverage",
-#'                "fisher", "faith", "log_modulo_skewness"),
-#'    name = c("Shannon", "GiniSimpson",  "InverseSimpson",  "Coverage",
-#'                "Fisher", "Faith", "LogModSkewness"))
-#'
+#' tse <- .estimate_diversity(tse,
+#'         index = c("shannon", "gini_simpson", "inverse_simpson", "coverage",
+#'                    "fisher", "faith", "log_modulo_skewness"),
+#'         name = c("Shannon", "GiniSimpson",  "InverseSimpson",  "Coverage",
+#'                    "Fisher", "Faith", "LogModSkewness"))
 #' # The colData contains the indices by their new names provided by the user
 #' colData(tse)[, name]
 #'
@@ -216,7 +219,7 @@
 #' plotColData(tse, "Shannon")
 #' # ... by sample type
 #' plotColData(tse, "Shannon", "SampleType")
-#' \dontrun{
+#' \donttest{
 #' # combining different plots
 #' library(patchwork)
 #' plot_index <- c("Shannon","GiniSimpson")
@@ -232,225 +235,103 @@
 #' }
 NULL
 
-#' @rdname estimateDiversity
-#' @export
-setGeneric("estimateDiversity",signature = c("x"),
-        function(x, assay.type = "counts", assay_name = NULL,
-                index = c("coverage", "fisher", "gini_simpson", 
-                        "inverse_simpson", "log_modulo_skewness", "shannon"),
-                    name = index, ...)
-                    standardGeneric("estimateDiversity"))
-
-#' @rdname estimateDiversity
-#' @export
-setMethod("estimateDiversity", signature = c(x="SummarizedExperiment"),
-    function(x, assay.type = "counts", assay_name = NULL,
-            index = c("coverage", "fisher", "gini_simpson", 
-                    "inverse_simpson", "log_modulo_skewness", "shannon"),
-                    name = index, ..., BPPARAM = SerialParam()){
-
-        if (!is.null(assay_name)) {
-            .Deprecated(old="assay_name", new="assay.type", "Now assay_name is deprecated. Use assay.type instead.")
-        }
-
-        # input check
-        index<- match.arg(index, several.ok = TRUE)
-        
-        if(!.is_non_empty_character(name) || length(name) != length(index)){
-            stop("'name' must be a non-empty character value and have the ",
-                "same length than 'index'.",
-                call. = FALSE)
-        }
-        .check_assay_present(assay.type, x)
-        .require_package("vegan")
-
-        dvrsts <- BiocParallel::bplapply(index,
-                                        .get_diversity_values,
-                                        x = x,
-                                        mat = assay(x, assay.type),
-                                        BPPARAM = BPPARAM,
-                                        ...)
-        .add_values_to_colData(x, dvrsts, name)
+.estimate_diversity <- function(
+        x, assay.type = assay_name, assay_name = "counts",
+        index = c(
+            "coverage", "faith", "fisher", "gini_simpson", "inverse_simpson",
+            "log_modulo_skewness", "shannon"),
+        name = index, BPPARAM = SerialParam(), ...){
+    # Check index
+    supported_index <- c(
+        "coverage", "faith", "fisher", "gini_simpson", "inverse_simpson",
+        "log_modulo_skewness", "shannon")
+    index_string <- paste0(
+        "'", paste0(supported_index, collapse = "', '"), "'")
+    if ( !all(index %in% supported_index) || !(length(index) > 0)) {
+        stop("'", paste0(
+            "'index' must be from the following options: '", index_string),
+            "'", call. = FALSE)
     }
-)
-
-#' @rdname estimateDiversity
-#' @export
-setMethod("estimateDiversity", signature = c(x="TreeSummarizedExperiment"),
-    function(x, assay.type = "counts", assay_name = NULL,
-            index = c("coverage", "faith", "fisher", "gini_simpson", 
-                    "inverse_simpson", "log_modulo_skewness", "shannon"),
-            name = index, tree_name = "phylo", 
-            ..., BPPARAM = SerialParam()){
-        # input check
-        # Check tree_name
-        if( !.is_non_empty_string(tree_name) ){
-            stop("'tree_name' must be a character specifying a rowTree of 'x'.",
-                 call. = FALSE)
-        }
-        if (!is.null(assay_name)) {
-            .Deprecated(old="assay_name", new="assay.type", "Now assay_name is deprecated. Use assay.type instead.")
-        }	
-        # Check indices
-        index <- match.arg(index, several.ok = TRUE)
-        if(!.is_non_empty_character(name) || length(name) != length(index)){
-            stop("'name' must be a non-empty character value and have the ",
-                "same length than 'index'.",
-                call. = FALSE)
-        }
-        
-        # If 'faith' is one of the indices
-        if( "faith" %in% index ){
-            # Get the name of "faith" index
-            faith_name <- name[index %in% "faith"]
-            # Store original names
-            name_original <- name
-            # And delete it from name
-            name <- name[!index %in% "faith"]
-
-            # Delete "faith" from indices
-            index <- index[!index %in% "faith"]
-            
-            # Faith will be calculated
-            calc_faith <- TRUE
-        } else{
-            # Faith will not be calculated
-            calc_faith <- FALSE
-        }
-        
-        # If index list contained other than 'faith' index, the length of the
-        # list is over 0
-        if( length(index)>0){
-            # Calculates all indices but not 'faith'
-            x <- callNextMethod()
-        }
-        # If 'faith' was one of the indices, 'calc_faith' is TRUE
-        if( calc_faith ){
-            # Get tree to check whether faith can be calculated
-            tree <- rowTree(x, tree_name)
-            # Check if faith can be calculated. Give warning and do not run estimateFaith
-            # if there is no rowTree and other indices were also calculated. Otherwise, 
-            # run estimateFaith. (If there is no rowTree --> error)
-            if( (is.null(tree) || is.null(tree$edge.length)) &&
-                length(index) >= 1 ){
-                warning("Faith diversity has been excluded from the results ",
-                        "since it cannot be calculated without rowTree. ",
-                        "This requires a rowTree in the input argument x. ",
-                        "Make sure that 'rowTree(x)' is not empty, or ",
-                        "make sure to specify 'tree_name' in the input ",
-                        "arguments. Warning is also provided if the tree does ",
-                        "not have any branches. You can consider adding ",
-                        "rowTree to include this index.", 
-                        call. = FALSE)
-            } else {
-                x <- estimateFaith(x, name = faith_name, tree_name = tree_name, ...)
-                # Ensure that indices are in correct order
-                colnames <- colnames(colData(x))
-                colnames <- c(colnames[ !colnames %in% name_original ], name_original)
-                colData(x) <- colData(x)[ , colnames]
-            }
-        }
-        return(x)
+    # Check name
+    if(!.is_non_empty_character(name) || length(name) != length(index)){
+        stop("'name' must be a non-empty character value and have the ",
+            "same length as 'index'.",
+            call. = FALSE)
     }
-)
-
-#' @rdname estimateDiversity
-#' @export
-setGeneric("estimateFaith",signature = c("x", "tree"),
-            function(x, tree = "missing", 
-                    assay.type = "counts", assay_name = NULL,
-                    name = "faith", ...)
-            standardGeneric("estimateFaith"))
-
-#' @rdname estimateDiversity
-#' @export
-setMethod("estimateFaith", signature = c(x="SummarizedExperiment", tree="phylo"),
-    function(x, tree, assay.type = "counts", assay_name = NULL,
-            name = "faith", node_lab = NULL, ...){
-        # Input check
-        # Check 'tree'
-        # IF there is no rowTree gives an error
-        if( is.null(tree) || is.null(tree$edge.length) ){
-            stop("'tree' is NULL or it does not have any branches.",
-                "The Faith's alpha diversity index is not possible to calculate.",
-                call. = FALSE)
-        }
-        # Check 'assay.type'
-        .check_assay_present(assay.type, x)
-        # Check that it is numeric
-        if( !is.numeric(assay(x, assay.type)) ){
-            stop("The abundance matrix specificied by 'assay.type' must be numeric.",
-                 call. = FALSE)
-        }
-        # Check 'name'
-        if(!.is_non_empty_character(name)){
-            stop("'name' must be a non-empty character value.",
-                call. = FALSE)
-        }
-        # Check that node_lab is NULL or it specifies links between rownames and 
-        # node labs
-        if( !( is.null(node_lab) || 
-               is.character(node_lab) && length(node_lab) == nrow(x) ) ){
-            stop("'node_lab' must be NULL or a vector specifying links between ",
-                 "rownames and node labs of 'tree'.",
-                 call. = FALSE)
-        }
-        # Get the abundance matrix
-        mat <- assay(x, assay.type)
-        # Check that it is numeric
-        if( !is.numeric(mat) ){
-            stop("The abundance matrix specificied by 'assay.type' must be numeric.",
-                 call. = FALSE)
-        }
-        # Subset and rename rows of the assay to correspond node_labs
-        if( !is.null(node_lab) ){
-            # Subset 
-            mat <- mat[ !is.na(node_lab), ]
-            node_lab <- node_lab[ !is.na(node_lab) ]
-            # Rename
-            rownames(mat) <- node_lab
-        }
-        # Calculates Faith index
-        faith <- list(.calc_faith(mat, tree, ...))
-        # Adds calculated Faith index to colData
-        .add_values_to_colData(x, faith, name)
-    }
-)
-
-#' @rdname estimateDiversity
-#' @export
-setMethod("estimateFaith", signature = c(x="TreeSummarizedExperiment", tree="missing"),
-    function(x, assay.type = "counts", assay_name = NULL,
-            name = "faith", tree_name = "phylo", ...){
-        # Check tree_name
-        if( !.is_non_empty_character(tree_name) ){
-            stop("'tree_name' must be a character specifying a rowTree of 'x'.",
-                 call. = FALSE)
-        }
-        # Gets the tree
-        tree <- rowTree(x, tree_name)
-        if( is.null(tree) || is.null(tree$edge.length)){
-            stop("rowTree(x, tree_name) is NULL or the tree does not have any branches. ",
-            "The Faith's alpha diversity index cannot be calculated.",
-                call. = FALSE)
-        }
-        # Get node labs
-        node_lab <- rowLinks(x)[ , "nodeLab" ]
-        node_lab[ rowLinks(x)[, "whichTree"] != tree_name ] <- NA
-        # Give a warning, data will be subsetted
-        if( any(is.na(node_lab)) ){
-            warning("The rowTree named 'tree_name' does not include all the ",
-                    "rows which is why 'x' is subsetted when the Faith's alpha ",
-                    "diversity index is calculated.",
-                    call. = FALSE)
-        }
-        # Calculates the Faith index
-        estimateFaith(x, tree, name = name, node_lab = node_lab, ...)
-    }
-)
-
+    # Check assay and check that vegan package is available since it is
+    # required in some of the diversity calculations.
+    .check_assay_present(assay.type, x)
+    #
+    # Calculate specified diversity indices
+    dvrsts <- BiocParallel::bplapply(
+        index,
+        .get_diversity_values,
+        x = x,
+        mat = assay(x, assay.type),
+        BPPARAM = BPPARAM,
+        ...)
+    # Add them to colData
+    x <- .add_values_to_colData(x, dvrsts, name)
+    return(x)
+}
 
 ################################################################################
+
+.estimate_faith <- function(
+        x, mat, tree = NULL, tree.name = "phylo", node.label = node_lab,
+        node_lab = NULL, ...){
+    # Input check
+    # If tree is NULL, then we must have TreeSE object that has rowTree
+    if( is.null(tree) &&
+        !(is(x, "TreeSummarizedExperiment") && !is.null(rowTree(x))) ){
+        stop("'tree' must be provided.", call. = FALSE)
+    }
+    # If tree is not specified, then we get rowTree
+    if( is.null(tree) ){
+        tree <- rowTree(x, tree.name)
+        # When we get rowTree, we know the linking between rows and nodes.
+        node.label <- rowLinks(x)[ , "nodeLab" ]
+        node.label[ rowLinks(x)[, "whichTree"] != tree.name ] <- NA
+    }
+    # Check that tree is correct
+    if( is.null(tree) || is.null(tree$edge.length) ){
+        stop(
+            "'tree' is NULL or it does not have any branches. ",
+            "The Faith's alpha diversity index is not possible to ", 
+            "calculate.", call. = FALSE)
+    }
+
+    # Check that node.label is NULL or it specifies links between rownames and 
+    # node labs
+    if( !( is.null(node.label) || 
+           is.character(node.label) && length(node.label) == nrow(x) ) ){
+        stop(
+            "'node.label' must be NULL or a vector specifying links between ",
+            "rownames and node labs of 'tree'.",
+            call. = FALSE)
+    }
+    
+    # Subset and rename rows of the assay to correspond node_labs
+    if( !is.null(node.label) && any(is.na(node.label)) ){
+        # Subset
+        if( !any(is.na(node.label)) ){
+            warning(
+                "The tree named does not include all the ",
+                "rows. 'x' is subsetted.", call. = FALSE)
+            mat <- mat[ !is.na(node.label), ]
+            node.label <- node.label[ !is.na(node.label) ]
+        }
+        # Rename
+        rownames(mat) <- node.label
+    }
+    # To calculate faith, the assay must have rownames
+    if( is.null(rownames(mat)) ){
+        stop("'x' must have rownames.", call. = FALSE)
+    }
+    # Calculates Faith index
+    res <- .calc_faith(mat, tree, ...)
+    return(res)
+}
 
 .calc_shannon <- function(mat, ...){
     vegan::diversity(t(mat), index="shannon")
@@ -565,7 +446,7 @@ setMethod("estimateFaith", signature = c(x="TreeSummarizedExperiment", tree="mis
     # Loop through taxa that were found from each sample
     faiths_for_taxa_present <- lapply(present[ind], function(x){
         # Trim the tree
-        temp <- .prune_tree(tree, x)
+        temp <- .prune_tree(tree, x, ...)
         # Sum up all the lengths of edges
         temp <- sum(temp$edge.length)
         return(temp)
@@ -575,47 +456,23 @@ setMethod("estimateFaith", signature = c(x="TreeSummarizedExperiment", tree="mis
     return(faiths)
 }
 
-# This function trims tips until all tips can be found from provided set of nodes
-#' @importFrom ape drop.tip
-.prune_tree <- function(tree, nodes){
-    # Get those tips that can not be found from provided nodes
-    remove_tips <- tree$tip.label[!tree$tip.label %in% nodes]
-    # As long as there are tips to be dropped, run the loop
-    while( length(remove_tips) > 0 ){
-        # Drop tips that cannot be found. Drop only one layer at the time. Some
-        # dataset might have taxa that are not in tip layer but they are higher
-        # higher rank. IF we delete more than one layer at the time, we might
-        # loose the node for those taxa. --> The result of pruning is a tree
-        # whose all tips can be found provided nodes i.e., rows of TreeSE. Some
-        # taxa might be higher rank meaning that all rows might not be in tips
-        # even after pruning; they have still child-nodes.
-        tree <- drop.tip(tree, remove_tips, trim.internal = FALSE, collapse.singles = FALSE)
-        # If all tips were dropped, the result is NULL --> stop loop
-        if( is.null(tree) ){
-            break
-        }
-        # Again, get those tips of updated tree that cannot be found from provided nodes
-        remove_tips <- tree$tip.label[!tree$tip.label %in% nodes]
-    }
-    return(tree)
-}
-
-.calc_log_modulo_skewness <- function(mat, quantile = 0.5, num_of_classes = 50, ...){
+.calc_log_modulo_skewness <- function(mat, quantile = 0.5, 
+    nclasses = num_of_classes, num_of_classes = 50, ...){
     # quantile must be a numeric value between 0-1
     if( !( is.numeric(quantile) && (quantile >= 0 && quantile <= 1) ) ){
         stop("'quantile' must be a numeric value between 0-1.",
             call. = FALSE)
     }
-    # num_of_classes must be a positive numeric value
-    if( !( is.numeric(num_of_classes) && num_of_classes > 0 ) ){
-        stop("'num_of_classes' must be a positive numeric value.",
+    # nclasses must be a positive numeric value
+    if( !( is.numeric(nclasses) && nclasses > 0 ) ){
+        stop("'nclasses' must be a positive numeric value.",
             call. = FALSE)
     }
     # Determine the quantile point.
     quantile_point <- quantile(max(mat), quantile)
     # Tabulate the arithmetic abundance classes. Use the same classes
     # for all samples for consistency
-    cutpoints <- c(seq(0, quantile_point, length=num_of_classes), Inf)
+    cutpoints <- c(seq(0, quantile_point, length=nclasses), Inf)
     # Calculates sample-wise frequencies. How many taxa in each interval?
     freq_table <- table(cut(mat, cutpoints), col(mat))
     # Calculates the skewness of frequency table. Returns skewness for each
@@ -629,13 +486,13 @@ setMethod("estimateFaith", signature = c(x="TreeSummarizedExperiment", tree="mis
 .calc_skewness <- function(x) {
     # Transposes the table
     x <- t(x)
-    # Each value is substracted by sample-wise mean, which is raised to the
+    # Each value is subtracted by sample-wise mean, which is raised to the
     # power of 3.
     # Then the sample-wise sum is taken from these values. 
     numerator <- rowSums2((x - rowMeans2(x))^3)
     # Sample-wise sum is divided by number of taxa that are not NA.
     numerator <- numerator/rowSums2(!is.na(x))
-    # Each value is substracted by sample-wise mean, which is raises to the
+    # Each value is subtracted by sample-wise mean, which is raises to the
     # power of 2.
     # Then the sample-wise sum is taken from these values. 
     denominator <- rowSums2((x - rowMeans2(x))^2)
@@ -649,16 +506,17 @@ setMethod("estimateFaith", signature = c(x="TreeSummarizedExperiment", tree="mis
 }
 
 #' @importFrom SummarizedExperiment assay assays
-.get_diversity_values <- function(index, x, mat, tree, ...){
+.get_diversity_values <- function(index, x, mat, ...){
     FUN <- switch(index,
-                        shannon = .calc_shannon,
-                        gini_simpson = .calc_gini_simpson,
-                        inverse_simpson = .calc_inverse_simpson,
-                        coverage = .calc_coverage,
-                        fisher = .calc_fisher,
-                        faith = .calc_faith,
-                        log_modulo_skewness = .calc_log_modulo_skewness
-                        )
-
-    FUN(x = x, mat = mat, tree = tree, ...)
+        shannon = .calc_shannon,
+        gini_simpson = .calc_gini_simpson,
+        inverse_simpson = .calc_inverse_simpson,
+        coverage = .calc_coverage,
+        fisher = .calc_fisher,
+        faith = .estimate_faith,
+        log_modulo_skewness = .calc_log_modulo_skewness
+        )
+    res <- FUN(x = x, mat = mat, ...)
+    res <- unname(res)
+    return(res)
 }

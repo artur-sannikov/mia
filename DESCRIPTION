@@ -1,6 +1,6 @@
 Package: mia
 Type: Package
-Version: 1.11.9
+Version: 1.13.38
 Authors@R:
     c(person(given = "Felix G.M.", family = "Ernst", role = c("aut"),
              email = "felix.gm.ernst@outlook.com",
@@ -24,7 +24,25 @@ Authors@R:
       person(given = "Domenick", family = "Braccia",
              email = "dbraccia@umd.edu", role=c("ctb")),
       person(given = "Basil", family = "Courbayre", role=c("ctb")),
-      person(given = "Muluh", family = "Muluh", role=c("ctb")))
+      person(given = "Muluh", family = "Muluh", role=c("ctb")),
+      person(given = "Giulio", family = "Benedetti", role=c("ctb")),
+      person(given = c("Moritz", "Emanuel"), family = "Beber",
+             email = "moritz.beber@igdore.org", role = c("ctb"),
+             comment = c(ORCID = "0000-0003-2406-1978")),
+      person(given = "Nitesh", family = "Turaga", role=c("ctb")),
+      person(given = "Chouaib", family = "Benchraka", role=c("ctb")),
+      person(given = "Akewak", family = "Jeba", role=c("ctb")),
+      person(given = "Himmi", family = "Lindgren", role=c("ctb")),
+      person(given = "Noah", family = "De Gunst", role=c("ctb")),
+      person(given = "Théotime", family = "Pralas", role=c("ctb")),
+      person(given = "Shadman", family = "Ishraq", role=c("ctb")),
+      person(given = "Eineje", family = "Ameh", role=c("ctb")),
+      person(given = "Artur", family = "Sannikov", role=c("ctb")),
+      person(given = "Hervé", family = "Pagès", role=c("ctb")),
+      person(given = "Rajesh", family = "Shigdel", role=c("ctb")),
+      person(given = "Katariina", family = "Pärnänen", role=c("ctb")),
+      person(given = "Pande", family = "Erawijantari", role=c("ctb")),
+      person(given = "Danielle", family = "Callan", role=c("ctb")))
 Title: Microbiome analysis
 Description:
     mia implements tools for microbiome analysis based on the 
@@ -66,13 +84,16 @@ Imports:
     tibble,
     tidyr,
     bluster,
-    MatrixGenerics
+    MatrixGenerics,
+    mediation,
+    rbiom
 Suggests:
     testthat,
     knitr,
     patchwork,
     BiocStyle,
     yaml,
+    miaViz,
     phyloseq,
     dada2,
     stringr,
@@ -80,9 +101,13 @@ Suggests:
     reldist,
     ade4,
     microbiomeDataSets,
-    rmarkdown
+    rmarkdown,
+    rhdf5,
+    topicmodels,
+    topicdoc,
+    NMF
 URL: https://github.com/microbiome/mia
 BugReports: https://github.com/microbiome/mia/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr

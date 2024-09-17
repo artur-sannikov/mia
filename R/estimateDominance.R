@@ -6,9 +6,8 @@
 #' \sQuote{Gini}, \sQuote{McNaughton’s}, \sQuote{Relative}, and
 #' \sQuote{Simpson's} indices.
 #'
-#' @param x a
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}}
-#'   object
+#' @param x a \code{\link[SummarizedExperiment:SummarizedExperiment-class]{
+#'   SummarizedExperiment}} object
 #'
 #' @param assay.type A single character value for selecting the
 #'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assay}}
@@ -55,16 +54,16 @@
 #' indices (species richness, evenness, diversity, rarity). More dominant
 #' communities are less diverse.
 #'
-#' \code{estimateDominance} calculates the following community dominance
+#' \code{.estimate_dominance} calculates the following community dominance
 #' indices:
 #'
 #' \itemize{
 #' 
-#' \item{'absolute' }{Absolute index equals to the absolute abundance of the
+#' \item 'absolute': Absolute index equals to the absolute abundance of the
 #' most dominant n species of the sample (specify the number with the argument
-#' \code{ntaxa}). Index gives positive integer values.}
+#' \code{ntaxa}). Index gives positive integer values.
 #' 
-#' \item{'dbp' }{Berger-Parker index (See Berger & Parker 1970) calculation
+#' \item 'dbp': Berger-Parker index (See Berger & Parker 1970) calculation
 #' is a special case of the 'relative' index. dbp is the relative abundance of
 #' the most
 #' abundant species of the sample. Index gives values in interval 0 to 1,
@@ -73,9 +72,9 @@
 #' \deqn{dbp = \frac{N_1}{N_{tot}}}{%
 #' dbp = N_1/N_tot} where \eqn{N_1} is the absolute abundance of the most
 #' dominant species and \eqn{N_{tot}} is the sum of absolute abundances of all
-#' species.}
+#' species.
 #' 
-#' \item{'core_abundance' }{ Core abundance index is related to core species.
+#' \item 'core_abundance': Core abundance index is related to core species.
 #' Core species are species that are most abundant in all samples, i.e., in
 #' whole data set. Core species are defined as those species that have
 #' prevalence over 50\%. It means that in order to belong to core species,
@@ -87,9 +86,9 @@
 #' \deqn{core_abundance = \frac{N_{core}}{N_{tot}}}{%
 #' core_abundance = N_core/N_tot} where \eqn{N_{core}} is the sum of absolute
 #' abundance of the core species and \eqn{N_{tot}} is the sum of absolute
-#' abundances of all species.}
+#' abundances of all species.
 #' 
-#' \item{'gini' }{ Gini index is probably best-known from socio-economic
+#' \item 'gini':  Gini index is probably best-known from socioeconomic
 #' contexts (Gini 1921). In economics, it is used to measure, for example, how
 #' unevenly income is distributed among population. Here, Gini index is used
 #' similarly, but income is replaced with abundance. 
@@ -98,9 +97,9 @@
 #' that represent large portion of total abundance of microbes, the inequality
 #' is large and Gini index closer to 1. If all species has equally large
 #' abundances, the equality is perfect and Gini index equals 0. This index
-#' should not be confused with Gini-Simpson index, which quantifies diversity.}
+#' should not be confused with Gini-Simpson index, which quantifies diversity.
 #'
-#' \item{'dmn' }{McNaughton’s index is the sum of relative abundances of the two
+#' \item 'dmn': McNaughton’s index is the sum of relative abundances of the two
 #' most abundant species of the sample (McNaughton & Wolf, 1970). Index gives
 #' values in the unit interval:
 #'
@@ -108,9 +107,9 @@
 #'
 #' where \eqn{N_1} and \eqn{N_2} are the absolute
 #' abundances of the two most dominant species and \eqn{N_{tot}} is the sum of
-#' absolute abundances of all species.}
+#' absolute abundances of all species.
 #'
-#' \item{'relative' }{ Relative index equals to the relative abundance of the
+#' \item 'relative': Relative index equals to the relative abundance of the
 #' most dominant n species of the sample (specify the number with the
 #' argument \code{ntaxa}).
 #' This index gives values in interval 0 to 1.
@@ -119,9 +118,9 @@
 #'
 #' where \eqn{N_1} is the absolute abundance of the most
 #' dominant species and \eqn{N_{tot}} is the sum of absolute abundances of all
-#' species.}
+#' species.
 #'
-#' \item{'simpson_lambda' }{ Simpson's (dominance) index or Simpson's lambda is
+#' \item 'simpson_lambda': Simpson's (dominance) index or Simpson's lambda is
 #' the sum of squared relative abundances. This index gives values in the unit interval.
 #' This value equals the probability that two randomly chosen individuals
 #' belongs to the
@@ -136,7 +135,7 @@
 #' However, this is not provided and the simpler squared sum of relative
 #' abundances is used instead as the alternative index is not in the unit
 #' interval and it is highly
-#' correlated with the simpler variant implemented here.}
+#' correlated with the simpler variant implemented here.
 #' 
 #' }
 #'
@@ -163,30 +162,28 @@
 #'
 #' @seealso
 #' \itemize{
-#'   \item{\code{\link[mia:estimateRichness]{estimateRichness}}}
-#'   \item{\code{\link[mia:estimateEvenness]{estimateEvenness}}}
-#'   \item{\code{\link[mia:estimateDiversity]{estimateDiversity}}}
+#'   \item \code{\link[mia:estimateRichness]{estimateRichness}}
+#'   \item \code{\link[mia:estimateEvenness]{estimateEvenness}}
+#'   \item \code{\link[mia:estimateDiversity]{estimateDiversity}}
 #' }
 #'
-#' @name estimateDominance
-#' @export
-#'
-#' @author Leo Lahti and Tuomas Borman. Contact: \url{microbiome.github.io}
+#' @name .estimate_dominance
+#' @noRd
 #'
 #' @examples
 #' data(esophagus)
 #'
 #' # Calculates Simpson's lambda (can be used as a dominance index)
-#' esophagus <- estimateDominance(esophagus, index="simpson_lambda")
+#' esophagus <- .estimate_dominance(esophagus, index="simpson_lambda")
 #'
 #' # Shows all indices
 #' colData(esophagus)
 #'
 #' # Indices must be written correctly (e.g. dbp, not dbp), otherwise an error
 #' # gets thrown
-#' \dontrun{esophagus <- estimateDominance(esophagus, index="dbp")}
+#' \donttest{esophagus <- .estimate_dominance(esophagus, index="dbp")}
 #' # Calculates dbp and Core Abundance indices
-#' esophagus <- estimateDominance(esophagus, index=c("dbp", "core_abundance"))
+#' esophagus <- .estimate_dominance(esophagus, index=c("dbp", "core_abundance"))
 #' # Shows all indices
 #' colData(esophagus)
 #' # Shows dbp index
@@ -199,14 +196,14 @@
 #' colData(esophagus) <- NULL
 #'
 #' # Calculates all indices
-#' esophagus <- estimateDominance(esophagus)
+#' esophagus <- .estimate_dominance(esophagus)
 #' # Shows all indices
 #' colData(esophagus)
 #' # Deletes all indices
 #' colData(esophagus) <- NULL
 #'
 #' # Calculates all indices with explicitly specified names
-#' esophagus <- estimateDominance(esophagus,
+#' esophagus <- .estimate_dominance(esophagus,
 #'     index = c("dbp", "dmn", "absolute", "relative",
 #'               "simpson_lambda", "core_abundance", "gini"),
 #'     name  = c("BergerParker", "McNaughton", "Absolute", "Relative",
@@ -217,62 +214,56 @@
 #'
 NULL
 
-#' @rdname estimateDominance
-#' @export
-setGeneric("estimateDominance",signature = c("x"),
-           function(x,
-                    assay.type = assay_name, assay_name = "counts",
-                    index = c("absolute", "dbp", "core_abundance", "gini",
-                              "dmn", "relative", "simpson_lambda"),
-                    ntaxa = 1,
-                    aggregate = TRUE,
-                    name = index,
-                    ...,
-                    BPPARAM = SerialParam())
-               standardGeneric("estimateDominance"))
+setGeneric(
+    ".estimate_dominance", signature = c("x"),
+    function(x, ...) standardGeneric(".estimate_dominance"))
 
+setGeneric(
+    ".estimate_dominance",signature = c("x"),
+    function(
+        x, assay.type = assay_name, assay_name = "counts",
+        index = c(
+            "absolute", "dbp", "core_abundance", "gini", "dmn", "relative",
+            "simpson_lambda"),
+        ntaxa = 1, aggregate = TRUE, name = index, BPPARAM = SerialParam(), ...)
+    standardGeneric(".estimate_dominance"))
 
-#' @rdname estimateDominance
-#' @export
-setMethod("estimateDominance", signature = c(x = "SummarizedExperiment"),
-    function(x,
-             assay.type = assay_name, assay_name = "counts",
-             index = c("absolute", "dbp", "core_abundance", "gini", "dmn", 
-                       "relative", "simpson_lambda"),
-             ntaxa = 1,
-             aggregate = TRUE,
-             name = index,
-             ...,
-             BPPARAM = SerialParam()){
-
-        # Input check
-        # Check assay.type
-        .check_assay_present(assay.type, x)
-        # Check indices
-        index <- match.arg(index, several.ok = TRUE)
-        if(!.is_non_empty_character(name) || length(name) != length(index)){
-            stop("'name' must be a non-empty character value and have the ",
-                 "same length than 'index'.",
-                 call. = FALSE)
-        }
-
-        # Check aggregate
-        if(!.is_a_bool(aggregate)){
-            stop("'aggregate' must be TRUE or FALSE.", call. = FALSE)
-        }
-
-        # Calculates dominance indices
-        dominances <- BiocParallel::bplapply(index,
-                                             FUN = .get_dominance_values,
-                                             mat = assay(x,assay.type),
-                                             ntaxa = ntaxa,
-                                             aggregate = aggregate,
-                                             BPPARAM = BPPARAM)
-
-        # Add dominance indices to colData
-        .add_values_to_colData(x, dominances, name)
+.estimate_dominance <- function(
+        x, assay.type = assay_name, assay_name = "counts",
+        index = c(
+            "absolute", "dbp", "core_abundance", "gini", "dmn", "relative",
+            "simpson_lambda"),
+        ntaxa = 1, aggregate = TRUE, name = index, BPPARAM = SerialParam(),
+        ...){
+    # Input check
+    # Check assay.type
+    .check_assay_present(assay.type, x)
+    # Check indices
+    index <- match.arg(index, several.ok = TRUE)
+    if(!.is_non_empty_character(name) || length(name) != length(index)){
+        stop("'name' must be a non-empty character value and have the 
+             same length as 'index'",
+             call. = FALSE)
     }
-)
+
+    # Check aggregate
+    if(!.is_a_bool(aggregate)){
+        stop("'aggregate' must be TRUE or FALSE.", call. = FALSE)
+    }
+
+    # Calculates dominance indices
+    dominances <- BiocParallel::bplapply(
+        index,
+        FUN = .get_dominance_values,
+        mat = assay(x,assay.type),
+        ntaxa = ntaxa,
+        aggregate = aggregate,
+        BPPARAM = BPPARAM)
+
+    # Add dominance indices to colData
+    x <- .add_values_to_colData(x, dominances, name)
+    return(x)
+}
 
 #---------------------------Help functions--------------------------------------
 
@@ -294,7 +285,7 @@ setMethod("estimateDominance", signature = c(x = "SummarizedExperiment"),
 }
 
 .calc_core_dominance <- function(mat, ...){
-    getPrevalentAbundance(mat, detection = 0, as_relative = TRUE)
+    getPrevalentAbundance(mat, detection = 0, as.relative = TRUE)
 }
 
 .calc_dominance <- function(mat, ntaxa, aggregate, index){
@@ -329,24 +320,24 @@ setMethod("estimateDominance", signature = c(x = "SummarizedExperiment"),
     # Aggregate or not
     if (!aggregate) {
         idx <- apply(mat, 2L,
-                     function(mc) {
-                         order(as.vector(mc), decreasing = TRUE)[[ntaxa]]
-                     })
+                    function(mc) {
+                        order(as.vector(mc), decreasing = TRUE)[[ntaxa]]
+                    })
     } else {
         idx <- apply(mat, 2L,
-                     function(mc) {
-                         order(as.vector(mc), decreasing = TRUE)[seq_len(ntaxa)]
-                     })
+                    function(mc) {
+                        order(as.vector(mc), decreasing = TRUE)[seq_len(ntaxa)]
+                    })
         idx <- split(as.vector(idx),
-                     unlist(lapply(seq_len(length(idx) / ntaxa),rep.int,ntaxa)))
+                    unlist(lapply(seq_len(length(idx) / ntaxa),rep.int,ntaxa)))
     }
 
     ans <- lapply(mapply(function(i,j,x){x[i,j]},
-                         i = idx,
-                         j = seq_len(ncol(mat)),
-                         MoreArgs = list(x = mat),
-                         SIMPLIFY = FALSE),
-                  sum)
+                        i = idx,
+                        j = seq_len(ncol(mat)),
+                        MoreArgs = list(x = mat),
+                        SIMPLIFY = FALSE),
+                    sum)
     ans <- unlist(ans)
 
     # Adds sample names to the table
@@ -354,20 +345,18 @@ setMethod("estimateDominance", signature = c(x = "SummarizedExperiment"),
     ans
 }
 
-.get_dominance_values <- function(index, mat, ntaxa = 1, aggregate = TRUE, ...) {
-
+.get_dominance_values <- function(
+        index, mat, ntaxa = 1, aggregate = TRUE, ...) {
     FUN <- switch(index,
-                    simpson_lambda = .simpson_lambda,
-                    core_abundance = .calc_core_dominance,
-                    gini = .calc_gini_dominance,
-                    absolute = .calc_dominance,
-                    relative = .calc_dominance,
-                    dbp = .calc_dominance,
-                    dmn = .calc_dominance
+        simpson_lambda = .simpson_lambda,
+        core_abundance = .calc_core_dominance,
+        gini = .calc_gini_dominance,
+        absolute = .calc_dominance,
+        relative = .calc_dominance,
+        dbp = .calc_dominance,
+        dmn = .calc_dominance
         )
-
-    FUN(index, mat = mat, ntaxa = ntaxa, aggregate = aggregate, ...)
-
+    res <- FUN(index, mat = mat, ntaxa = ntaxa, aggregate = aggregate, ...)
+    res <- unname(res)
+    return(res)
 }
-
-

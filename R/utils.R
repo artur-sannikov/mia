@@ -1,3 +1,15 @@
+################################################################################
+# This function gives user a message when the package is loaded into the session
+.onAttach <- function(libname, pkgname) {
+    pkg_version <- utils::packageDescription(pkgname, fields = "Version")
+    msg <- paste0(
+        "This is ", pkgname, " version ", pkg_version, "\n",
+        "- Online documentation and vignettes: https://microbiome.github.io/", pkgname, "/",
+        "\n",
+        "- Online book 'Orchestrating Microbiome Analysis (OMA)': https://microbiome.github.io/OMA/docs/devel/"
+    )
+    packageStartupMessage(msg)
+}
 
 ################################################################################
 # internal methods loaded from other packages
@@ -34,8 +46,12 @@
   is.character(x) && length(x) == 1L
 }
 
+.is_integer <- function(x){
+  is.numeric(x) && all(x%%1==0)
+}
+
 .is_an_integer <- function(x){
-    is.numeric(x) && length(x) == 1L && x%%1==0
+    .is_integer(x) && x%%1==0
 }
 
 .are_whole_numbers <- function(x){
@@ -80,25 +96,25 @@
     }
 }
 
-.check_rowTree_present <- function(tree_name, x,
-                                   name = .get_name_in_parent(tree_name) ){
-    if( !.is_non_empty_string(tree_name) ){
+.check_rowTree_present <- function(tree.name, x,
+                                   name = .get_name_in_parent(tree.name) ){
+    if( !.is_non_empty_string(tree.name) ){
         stop("'", name, "' must be a single non-empty character value.",
              call. = FALSE)
     }
-    if( !(tree_name %in% names(x@rowTree)) ){
+    if( !(tree.name %in% names(x@rowTree)) ){
         stop("'", name, "' must specify a tree from 'x@rowTree'.",
              call. = FALSE)
     }
 }
 
-.check_colTree_present <- function(tree_name, x,
-                                   name = .get_name_in_parent(tree_name) ){
-    if( !.is_non_empty_string(tree_name) ){
+.check_colTree_present <- function(tree.name, x,
+                                   name = .get_name_in_parent(tree.name) ){
+    if( !.is_non_empty_string(tree.name) ){
         stop("'", name, "' must be a single non-empty character value.",
              call. = FALSE)
     }
-    if( !(tree_name %in% names(x@colTree)) ){
+    if( !(tree.name %in% names(x@colTree)) ){
         stop("'", name, "' must specify a tree from 'x@colTree'.",
              call. = FALSE)
     }
@@ -136,19 +152,15 @@
 }
 
 # Check MARGIN parameters. Should be defining rows or columns.
-.check_MARGIN <- function(MARGIN) {
-    # Convert to lowcase if it is a string
-    if( .is_non_empty_string(MARGIN) ) {
-        MARGIN <- tolower(MARGIN)
-    }
+.check_MARGIN <- function(MARGIN, name = .get_name_in_parent(MARGIN)) {
     # MARGIN must be one of the following options
-    if( !(length(MARGIN) == 1L && MARGIN %in% c(
+    if( !(length(MARGIN) == 1L && tolower(MARGIN) %in% c(
             1, 2, "1", "2", "features", "samples", "columns", "col", "row",
             "rows", "cols")) ) {
-        stop("'MARGIN' must equal 1 or 2.", call. = FALSE)
+        stop("'", name,"' must be 'rows' or 'cols'.", call. = FALSE)
     }
     # Convert MARGIN to numeric if it is not.
-    MARGIN <- ifelse(MARGIN %in% c(
+    MARGIN <- ifelse(tolower(MARGIN) %in% c(
         "samples", "columns", "col", 2, "cols"), 2, 1)
     return(MARGIN)
 }
@@ -174,6 +186,8 @@
 ################################################################################
 # Internal wrappers for setters
 
+# This function adds values to colData (or rowData). The data must be in a list.
+# Each element of list represent a column to be added to col/rowData.
 #' @importFrom SummarizedExperiment colData colData<- rowData rowData<-
 #' @importFrom S4Vectors DataFrame
 .add_values_to_colData <- function(
@@ -190,7 +204,7 @@
     # Check that MARGIN is correct
     MARGIN <- .check_MARGIN(MARGIN)
     #
-    # If trasnpose.MARGIN is TRUE, transpose MARGIN, i.e. 1 --> 2, and 2 --> 1.
+    # If transpose.MARGIN is TRUE, transpose MARGIN, i.e. 1 --> 2, and 2 --> 1.
     # In certain functions, values calculated by rows (MARGIN=1) are stored to
     # colData (MARGIN=2) and vice versa.
     if( transpose.MARGIN ){
@@ -306,6 +320,87 @@
     return(x)
 }
 
+# This function can be used to add values to altExp
+.add_to_altExps <- function(x, values, name = names(values), ...){
+    # Check values
+    if( !((is(values, "list") || is(values, "SimpleList")) &&
+            length(values) > 0) ){
+        stop("'values' must be non-empty list.", call. = FALSE)
+    }
+    # Check names
+    if( !is.character(name) && length(name) > 1L ){
+        stop("'name' must be a character value.", call. = FALSE)
+    }
+    # Names must match with list
+    if( length(values) != length(name) ){
+        stop("Lenght of 'name' must match with 'values'.", call. = FALSE)
+    }
+    #
+    # If the object is SE, convert it to TreeSE
+    if( !is(x, "SingleCellExperiment") ){
+        x <- as(x, "TreeSummarizedExperiment")
+        warning(
+            "SummarizedExperiment does not have altExps slot. ",
+            "Therefore, it is converted to TreeSummarizedExperiment.",
+            call. = FALSE)
+    }
+    #
+    # Add names to values
+    names(values) <- name
+    # Get altExps
+    old_altexp <- altExps(x)
+    # Check if names match with elements that are already present
+    f <- names(old_altexp) %in% names(values)
+    if( any(f) ){
+        warning(
+          "The following values are already present in `altExps` and will ",
+          "be overwritten: '",
+          paste(names(old_altexp)[f], collapse = "', '"),
+          "'. Consider using the 'name' argument to specify alternative ",
+          "names.", call. = FALSE)
+    }
+    # Keep only unique values
+    values <- c( old_altexp[!f], values )
+    # Add to altExps
+    altExps(x) <- values
+    return(x)
+}
+
+# This function can be used to add values to reducedDims
+.add_values_to_reducedDims <- function(x, values, name, ...){
+    # Check values
+    if( !((is(values, "matrix") || is(values, "dist")) && length(values) > 0) ){
+        stop("'values' must be a matrix.", call. = FALSE)
+    }
+    # Check names
+    if( !.is_a_string(name) ){
+        stop("'name' must be a character value.", call. = FALSE)
+    }
+    #
+    # If the object is SE, convert it to TreeSE
+    if( !is(x, "SingleCellExperiment") ){
+        x <- as(x, "TreeSummarizedExperiment")
+        warning(
+            "SummarizedExperiment does not have reducedDims slot. ",
+            "Therefore, it is converted to TreeSummarizedExperiment.",
+            call. = FALSE)
+    }
+    if( !identical(rownames(as.matrix(values)), colnames(x)) ){
+        stop("Rownames of the matrix should match with colnames(x).",
+             " The result is not added to reducedDims.")
+    }
+    # Throw warning if values of reducedDim are overwritten
+    if( name %in% names(reducedDims(x)) ){
+        warning(
+            "The following values are already present in `reducedDims` and", 
+            " will be overwritten: '", name,
+            "'. Consider using the 'name' argument to specify alternative ",
+            "names.", call. = FALSE)
+    }
+    reducedDim(x, name) <- values
+    return(x)
+}
+
 ################################################################################
 # Other common functions
 
@@ -352,11 +447,11 @@
 #'  between different taxonomic levels, defaults to one compatible with both
 #'  GreenGenes and SILVA `; |;"`.
 #'  
-#' @param column_name a single \code{character} value defining the column of taxa_tab
+#' @param col.name a single \code{character} value defining the column of taxa_tab
 #'  that includes taxonomical information.
 #'  
-#' @param remove.prefix {\code{TRUE} or \code{FALSE}: Should 
-#'  taxonomic prefixes be removed? (default: \code{remove.prefix = FALSE})}
+#' @param prefix.rm {\code{TRUE} or \code{FALSE}: Should 
+#'  taxonomic prefixes be removed? (default: \code{prefix.rm = FALSE})}
 #'  
 #' @return  a `data.frame`.
 #' @keywords internal
@@ -364,18 +459,18 @@
 #' @importFrom S4Vectors DataFrame
 #' @noRd
 .parse_taxonomy <- function(
-    taxa_tab, sep = "; |;", column_name = "Taxon",
-    remove.prefix = removeTaxaPrefixes, removeTaxaPrefixes = FALSE,
-    returned.ranks = TAXONOMY_RANKS, ...) {
+    taxa_tab, sep = "; |;", col.name = column_name, column_name = "Taxon",
+    remove.prefix = prefix.rm, prefix.rm = removeTaxaPrefixes,
+    removeTaxaPrefixes = FALSE, ...) {
     ############################### Input check ################################
     # Check sep
     if(!.is_non_empty_string(sep)){
       stop("'sep' must be a single character value.",
            call. = FALSE)
     }
-    # Check column_name
-    if( !(.is_non_empty_string(column_name) && column_name %in% colnames(taxa_tab)) ){
-      stop("'column_name' must be a single character value defining column that includes",
+    # Check col.name
+    if( !(.is_non_empty_string(col.name) && col.name %in% colnames(taxa_tab)) ){
+      stop("'col.name' must be a single character value defining column that includes",
            " information about taxonomic levels.",
            call. = FALSE)
     }
@@ -383,59 +478,101 @@
     if(!.is_a_bool(remove.prefix)){
         stop("'remove.prefix' must be TRUE or FALSE.", call. = FALSE)
     }
-    # Check returned.ranks
-    if( !is.character(returned.ranks) ){
-        stop("'returned.ranks' must be a character vector.", call. = FALSE)
-    }
     ############################## Input check end #############################
     
     #  work with any combination of taxonomic ranks available
-    all_ranks <- c(
-      "Kingdom","Phylum","Class","Order","Family","Genus","Species", "Strain")
-    all_prefixes <- c("k__", "p__", "c__", "o__", "f__", "g__", "s__", "t__")
+    all_ranks <- .taxonomy_rank_prefixes
+    all_prefixes <- paste0(all_ranks, "__")
+    names(all_prefixes) <- names(all_ranks)
     
     # split the taxa strings
-    taxa_split <- CharacterList(strsplit(taxa_tab[, column_name],sep))
+    taxa_split <- CharacterList(strsplit(taxa_tab[, col.name],sep))
     # extract present prefixes
     taxa_prefixes <- lapply(taxa_split, substr, 1L, 3L)
     # match them to the order given by present_prefixes
     taxa_prefixes_match <- lapply(taxa_prefixes, match, x = all_prefixes)
     taxa_prefixes_match <- IntegerList(taxa_prefixes_match)
-    # get the taxa values
+    # get the taxa values without prefixes
     if(remove.prefix){
+        pattern <- paste0("(", paste0(all_ranks, collapse = "|"), ")__")
         taxa_split <- lapply(
-            taxa_split, gsub, pattern = "([kpcofgst]+)__", replacement = "")
-      taxa_split <- CharacterList(taxa_split)
+            taxa_split, gsub, pattern = pattern, replacement = "")
+        taxa_split <- CharacterList(taxa_split)
     }
     # extract by order matches
     taxa_split <- taxa_split[taxa_prefixes_match]
     #
     if(length(unique(lengths(taxa_split))) != 1L){
-      stop("Internal error. Something went wrong while splitting taxonomic levels.",
-           "Please check that 'sep' is correct.", call. = FALSE)
+        stop("Internal error. Something went wrong while splitting taxonomic ",
+            "levels. Please check that 'sep' is correct.", call. = FALSE)
     }
     taxa_tab <- DataFrame(as.matrix(taxa_split))
-    colnames(taxa_tab) <- all_ranks
+    colnames(taxa_tab) <- names(all_ranks)
     
-    # Subset columns so that it includes TAXONOMY_RANKS columns by default.
-    # If strain column has values, it it also returned.
-    ind <- !(!tolower(colnames(taxa_tab)) %in% tolower(returned.ranks) &
-        colSums(is.na(taxa_tab)) == nrow(taxa_tab))
-    taxa_tab <- taxa_tab[ , ind, drop = FALSE]
+    # Subset columns so that include only those columns that have some
+    # information
+    non_empty <- colSums(is.na(taxa_tab)) != nrow(taxa_tab)
+    taxa_tab <- taxa_tab[ , non_empty, drop = FALSE]
     
     return(taxa_tab)
 }
 
 ################################################################################
-# internal wrappers for agglomerateByRank/mergeRows
+# internal wrappers for agglomerateByRank/agglomerateByVariable
 .merge_features <- function(x, merge.by, ...) {
     # Check if merge.by parameter belongs to taxonomyRanks
     if (is.character(merge.by) && length(merge.by) == 1 && merge.by %in% taxonomyRanks(x)) {
          #Merge using agglomerateByRank
         x <- agglomerateByRank(x, rank = merge.by, ...)
     } else {
-        # Merge using mergeRows
-        x <- mergeRows(x, f = merge.by, ...)
+        # Merge using agglomerateByVariable
+        x <- agglomerateByVariable(x, by = "rows", f = merge.by, ...)
     }
     return(x)
+}
+
+################################################################################
+# This function sets taxonomy ranks based on rowData of TreeSE. With this,
+# user can automatically set ranks based on imported data.
+.set_ranks_based_on_rowdata <- function(
+        tse, set.ranks = FALSE, verbose = TRUE, ...){
+    #
+    if( !.is_a_bool(set.ranks) ){
+        stop("'set.ranks' must be TRUE or FALSE.", call. = FALSE)
+    }
+    #
+    if( !.is_a_bool(verbose) ){
+        stop("'verbose' must be TRUE or FALSE.", call. = FALSE)
+    }
+    #
+    # If user do not want to set ranks
+    if( !set.ranks ){
+        return(NULL)
+    }
+    # Get ranks from rowData
+    ranks <- colnames(rowData(tse))
+    # Ranks must be character columns
+    is_char <- lapply(rowData(tse), function(x) is.character(x) || is.factor(x))
+    is_char <- unlist(is_char)
+    ranks <- ranks[ is_char ]
+    # rowData is empty, cannot set ranks
+    if( length(ranks) == 0 ){
+        warning(
+            "Ranks cannot be set. rowData(x) does not include columns ",
+            "specifying character values.", call. = FALSE)
+        return(NULL)
+    }
+    # Finally, set ranks and give message
+    temp <- setTaxonomyRanks(ranks)
+    if( verbose ){
+        message(
+            "TAXONOMY_RANKS set to: '", paste0(ranks, collapse = "', '"), "'")
+    }
+    return(NULL)
+}
+
+################################################################################
+# This function converts vector of character values to capitalized.
+.capitalize <- function(x){
+    paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }

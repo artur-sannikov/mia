@@ -44,7 +44,7 @@ test_that("transformAssay", {
 
         ########################### LOG10 ######################################
         # Calculates log10 transformation with pseudocount. Should be equal.
-	tmp <- mia::transformAssay(tse, method = "log10", pseudocount = 1)
+	    tmp <- mia::transformAssay(tse, method = "log10", pseudocount = 1)
 
         ass <- assays(tmp)$log10
         expect_equal(as.matrix(ass),
@@ -186,13 +186,20 @@ test_that("transformAssay", {
         expect_error(transformAssay(tse, assay.type = "relabundance", 
                                      method = "clr"))
         
-        # Expect error when pseudocount TRUE but missing or negative values present
+        # Expect error when pseudocount TRUE but negative values present
         expect_error(transformAssay(tse, method = "relabundance",
-                                    assay.type = "neg_values", pseudocount = TRUE),
-                     "The assay contains missing or negative values. 'pseudocount' must be specified manually.")
-        expect_error(transformAssay(tse, method = "relabundance",
-                                    assay.type = "na_values", pseudocount = TRUE),
-                     "The assay contains missing or negative values. 'pseudocount' must be specified manually.")
+                                    assay.type = "neg_values", pseudocount = TRUE))
+        
+        # Expect pseudocount to be half of min value when NA values present
+        test3 <- tmp
+        assay(test3, "na_values") <- assay(test3, "counts")
+        assay(test3, "na_values")[4, 5] <- NA
+        actual <- transformAssay(test3, method = "relabundance",
+                                assay.type = "na_values", pseudocount = TRUE)
+        value <- attr(assay(actual, "relabundance"), "parameters")[["pseudocount"]]
+        ref <- assay(actual, "na_values")
+        ref <- min(ref[ref > 0], na.rm = TRUE)/2
+        expect_equal(value, ref)
 
         # Test that CLR with counts equal to CLR with relabundance
         assay(tse, "pseudo") <- assay(tse, "counts") + 1
@@ -210,19 +217,30 @@ test_that("transformAssay", {
         expect_equal(assay(tse, "rel_pseudo1"), assay(tse, "rel_pseudo2"),
                      check.attributes = FALSE)
         
-        # Check that pseudocount = TRUE is the same as pseudocount = min
+        # Check that pseudocount = TRUE is the same as pseudocount = half of
+        # the minimum value
         # and pseudocount = FALSE is the same as pseudocount = 0
         tse <- transformAssay(tse, method = "relabundance", pseudocount = TRUE, name = "pseudo_true")
+        pseudocount <- (min(assay(tse, "counts")[assay(tse, "counts") > 0])) / 2
         tse <- transformAssay(
             tse, method = "relabundance", name = "pseudo_min",
-            pseudocount = min(assay(tse, "counts")[assay(tse, "counts") > 0]),
+            pseudocount = pseudocount,
         )
         tse <- transformAssay(tse, method = "relabundance", pseudocount = FALSE, name = "pseudo_false")
         tse <- transformAssay(tse, method = "relabundance", pseudocount = 0, name = "pseudo_zero")
         expect_equal(assay(tse, "pseudo_true"), assay(tse, "pseudo_min"), check.attributes = FALSE)
         expect_equal(assay(tse, "pseudo_false"), assay(tse, "pseudo_zero"), check.attributes = FALSE)
         expect_false(all(assay(tse, "pseudo_true") == assay(tse, "pseudo_false")))
-
+        
+        # For non-integer values, the default pseudocount should be half of the
+        # minimum value
+        tse <- transformAssay(
+            tse, assay.type = "relabundance", method = "clr",
+            pseudocount = TRUE)
+        test <- attr(assay(tse, "clr"), "parameters")[["pseudocount"]]
+        ref <- assay(tse, "relabundance")
+        ref <- min(ref[ref > 0])/2
+        expect_equal(test, ref)
         ############################# NAMES ####################################
         # Tests that samples have correct names
         expect_equal(colnames(assays(transformAssay(tse, assay.type = "relabundance",
@@ -263,15 +281,13 @@ test_that("transformAssay", {
         ############################## Z TRANSFORMATION ########################
         # Calculates Z-transformation for features	
         xx <- t(scale(t(as.matrix(assay(tse, "counts")))))
-        expect_warning(z_assay <- assays(mia::ZTransform(tse, pseudocount = 1))$z)
+        expect_warning(z_assay <- assay(
+            mia::transformAssay(
+                tse, method = "standardize", MARGIN = "features",
+                pseudocount = 1),
+            "standardize"))
         expect_equal(max(abs(z_assay - xx), na.rm=TRUE), 0,
                      tolerance = 1e-14, check.attributes = FALSE)
-        
-        # Tests that ZTransform and transformAssay(MARGIN = "features"),  gives the same result
-        expect_warning(
-        expect_equal(assays(mia::ZTransform(tse))$z,
-                     assays(mia::transformAssay(tse, MARGIN = "features", method = "z"))$z)
-        )
 
         # Test that transformations are equal to ones directly from vegan
         # clr

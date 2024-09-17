@@ -8,16 +8,16 @@
 #' @param x a \code{\link{SummarizedExperiment}} object
 #'
 #' @param assay.type A single character value for selecting the
-#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assay}} used for
-#'   calculation of the sample-wise estimates.
+#'   \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assay}} used
+#'   for calculation of the sample-wise estimates.
 #'   
 #' @param assay_name a single \code{character} value for specifying which
 #'   assay to use for calculation.
 #'   (Please use \code{assay.type} instead. At some point \code{assay_name}
 #'   will be disabled.)
 #'
-#' @param index a \code{character} vector, specifying the evenness measures to be
-#'   calculated.
+#' @param index a \code{character} vector, specifying the evenness measures to
+#'   be calculated.
 #'
 #' @param name a name for the column(s) of the colData the results should be
 #'   stored in.
@@ -28,27 +28,28 @@
 #'
 #' @param ... optional arguments:
 #' \itemize{
-#'   \item{threshold}{ a numeric threshold. assay values below or equal
-#'     to this threshold will be set to zero.}
+#'   \item threshold:  a numeric threshold. assay values below or equal
+#'     to this threshold will be set to zero.
 #' }
 #'
 #' @return \code{x} with additional \code{\link{colData}} named \code{*name*}
 #'
 #' @details
-#' Evenness is a standard index in community ecology, and it quantifies how evenly the abundances
-#' of different species are distributed. The following evenness indices are provided:
+#' Evenness is a standard index in community ecology, and it quantifies how
+#' evenly the abundances of different species are distributed. The following
+#' evenness indices are provided:
 #'
 #' By default, this function returns all indices.
 #'
 #' The available evenness indices include the following (all in lowercase):
 #' \itemize{
-#'   \item{'camargo' }{Camargo's evenness (Camargo 1992)}
-#'   \item{'simpson_evenness' }{Simpson’s evenness is calculated as inverse Simpson diversity (1/lambda) divided by
-#'   observed species richness S: (1/lambda)/S.}
-#'   \item{'pielou' }{Pielou's evenness (Pielou, 1966), also known as Shannon or Shannon-Weaver/Wiener/Weiner
-#'     evenness; H/ln(S). The Shannon-Weaver is the preferred term; see Spellerberg and Fedor (2003).}
-#'   \item{'evar' }{Smith and Wilson’s Evar index (Smith & Wilson 1996).}
-#'   \item{'bulla' }{Bulla’s index (O) (Bulla 1994).}
+#'   \item 'camargo': Camargo's evenness (Camargo 1992)
+#'   \item 'simpson_evenness': Simpson’s evenness is calculated as inverse Simpson diversity (1/lambda) divided by
+#'   observed species richness S: (1/lambda)/S.
+#'   \item 'pielou': Pielou's evenness (Pielou, 1966), also known as Shannon or Shannon-Weaver/Wiener/Weiner
+#'     evenness; H/ln(S). The Shannon-Weaver is the preferred term; see Spellerberg and Fedor (2003).
+#'   \item 'evar': Smith and Wilson’s Evar index (Smith & Wilson 1996).
+#'   \item 'bulla': Bulla’s index (O) (Bulla 1994).
 #' }
 #'   
 #' Desirable statistical evenness metrics avoid strong bias towards very
@@ -70,7 +71,8 @@
 #' _Oikos_ 70:167--171.
 #'
 #' Camargo, JA. (1992)
-#' New diversity index for assessing structural alterations in aquatic communities.
+#' New diversity index for assessing structural alterations in aquatic
+#' communities.
 #' _Bull. Environ. Contam. Toxicol._ 48:428--434.
 #'
 #' Locey KJ and Lennon JT. (2016)
@@ -90,8 +92,8 @@
 #' _Oikos_ 76(1):70-82.
 #'
 #' Spellerberg and Fedor (2003).
-#' A tribute to Claude Shannon (1916 –2001) and a plea for more rigorous use of species richness,
-#' species diversity and the ‘Shannon–Wiener’ Index.
+#' A tribute to Claude Shannon (1916 –2001) and a plea for more rigorous use of
+#' species richness, species diversity and the ‘Shannon–Wiener’ Index.
 #' _Alpha Ecology & Biogeography_ 12, 177–197.
 #'
 #' @seealso
@@ -102,8 +104,8 @@
 #'   \item{\code{\link[mia:estimateDiversity]{estimateDiversity}}}
 #' }
 #'
-#' @name estimateEvenness
-#'
+#' @name .estimate_evenness
+#' @noRd
 #' @examples
 #' data(esophagus)
 #' tse <- esophagus
@@ -113,45 +115,33 @@
 #' name  <- c("Pielou", "Camargo", "SimpsonEvenness",  "Evar", "Bulla")
 #'
 #' # Estimate evenness and give polished names to be used in the output
-#' tse <- estimateEvenness(tse, index = index, name = name)
-#'
+#' tse <- estimate_evenness(tse, index = index, name = name)
 #' # Check the output
 #' head(colData(tse))
 #'
 NULL
 
-#' @rdname estimateEvenness
-#' @export
-setGeneric("estimateEvenness",signature = c("x"),
-           function(x, assay.type = assay_name, assay_name = "counts",
-                    index = c("pielou", "camargo", "simpson_evenness", "evar",
-                              "bulla"),
-                    name = index, ...)
-               standardGeneric("estimateEvenness"))
-
-#' @rdname estimateEvenness
-#' @export
-setMethod("estimateEvenness", signature = c(x = "SummarizedExperiment"),
-    function(x, assay.type = assay_name, assay_name = "counts",
-             index = c("camargo", "pielou", "simpson_evenness", "evar", "bulla"),
-             name = index, ..., BPPARAM = SerialParam()){
-         
-        # input check
-        index <- match.arg(index, several.ok = TRUE)
-        if(!.is_non_empty_character(name) || length(name) != length(index)){
-            stop("'name' must be a non-empty character value and have the ",
-                 "same length than 'index'.",
-                 call. = FALSE)
-        }
-        .check_assay_present(assay.type, x)
-        #
-        vnss <- BiocParallel::bplapply(index,
-                                       .get_evenness_values,
-                                       mat = assay(x, assay.type),
-                                       BPPARAM = BPPARAM, ...)
-        .add_values_to_colData(x, vnss, name)
+.estimate_evenness <- function(
+        x, assay.type = assay_name, assay_name = "counts",
+        index = c("camargo", "pielou", "simpson_evenness", "evar", "bulla"),
+        name = index, ..., BPPARAM = SerialParam()){
+    # input check
+    index <- match.arg(index, several.ok = TRUE)
+    if(!.is_non_empty_character(name) || length(name) != length(index)){
+        stop("'name' must be a non-empty character value and have the ",
+            "same length as 'index'.",
+            call. = FALSE)
     }
-)
+    .check_assay_present(assay.type, x)
+    #
+    vnss <- BiocParallel::bplapply(
+        index,
+        .get_evenness_values,
+        mat = assay(x, assay.type),
+        BPPARAM = BPPARAM, ...)
+    x <- .add_values_to_colData(x, vnss, name)
+    return(x)
+}
 
 .calc_bulla_evenness <- function(mat) {
     # Species richness (number of species)
@@ -240,20 +230,21 @@ setMethod("estimateEvenness", signature = c(x = "SummarizedExperiment"),
 }
 
 .get_evenness_values <- function(index, mat, threshold = 0, ...){
-
     if(!is.numeric(threshold) || length(threshold) != 1L){
         stop("'threshold' must be a single numeric value.", call. = FALSE)
     }
     if(threshold > 0){
         mat[mat <= threshold] <- 0
     }
-    
     FUN <- switch(index,
-                       camargo = .calc_camargo_evenness,
-                       pielou = .calc_pielou_evenness,
-                       simpson_evenness = .calc_simpson_evenness,
-                       evar = .calc_evar_evenness,
-                       bulla = .calc_bulla_evenness)
-
-    FUN(mat = mat, ...)
+        camargo = .calc_camargo_evenness,
+        pielou = .calc_pielou_evenness,
+        simpson_evenness = .calc_simpson_evenness,
+        evar = .calc_evar_evenness,
+        bulla = .calc_bulla_evenness
+        )
+    res <- FUN(mat = mat, ...)
+    res <- unname(res)
+    return(res)
 }
+
