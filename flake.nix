@@ -3,17 +3,29 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    scater-flake.url = "github:artur-sannikov/scater/nix-flakes";
   };
   outputs =
     {
       self,
       nixpkgs,
       flake-utils,
+      scater-flake,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        overlays = [
+          (final: prev: {
+            rPackages = prev.rPackages // {
+              # Force scater to be the bleeding-edge version
+              scater = scater-flake.packages.${system}.default;
+            };
+          })
+        ];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
         mia = pkgs.rPackages.buildRPackage {
           name = "mia";
           src = self;
