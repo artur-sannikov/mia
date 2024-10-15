@@ -1,6 +1,6 @@
 {
   "nodes": {
-    "flake-utils": {
+    "flake-utilcs": {
       "inputs": {
         "systems": "systems"
       },
@@ -18,7 +18,7 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
+    "flake-utils": {
       "inputs": {
         "systems": "systems_2"
       },
@@ -31,68 +31,31 @@
         "type": "github"
       },
       "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
+        "id": "flake-utils",
+        "type": "indirect"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1728538411,
-        "narHash": "sha256-f0SBJz1eZ2yOuKUr5CA9BHULGXVSn6miBuUWdTyhUhU=",
-        "owner": "NixOS",
+        "lastModified": 1728952074,
+        "narHash": "sha256-ePyOo5/EglCua6X1PL7Qa1lvfrJtNAar+iKV9A7Qy+Y=",
+        "owner": "rstats-on-nix",
         "repo": "nixpkgs",
-        "rev": "b69de56fac8c2b6f8fd27f2eca01dcda8e0a4221",
+        "rev": "806cbde71e5437a69cf6e4e9796fd6956d0c9028",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1728538411,
-        "narHash": "sha256-f0SBJz1eZ2yOuKUr5CA9BHULGXVSn6miBuUWdTyhUhU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "b69de56fac8c2b6f8fd27f2eca01dcda8e0a4221",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
+        "owner": "rstats-on-nix",
+        "ref": "r-bioc-devel",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
+        "flake-utilcs": "flake-utilcs",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
-        "scater-flake": "scater-flake"
-      }
-    },
-    "scater-flake": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1728895985,
-        "narHash": "sha256-1wSlT+JHTeE5tBU1mZENxsD3NAeXg5rujppDnI6rER8=",
-        "owner": "artur-sannikov",
-        "repo": "scater",
-        "rev": "7001e5ea84c14fe37ded23c84aa20897d5eed250",
-        "type": "github"
-      },
-      "original": {
-        "owner": "artur-sannikov",
-        "ref": "nix-flakes",
-        "repo": "scater",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     },
     "systems": {

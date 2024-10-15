@@ -1,30 +1,21 @@
 {
   description = "Nix Flake for mia R package";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:rstats-on-nix/nixpkgs/r-bioc-devel";
     flake-utils.url = "github:numtide/flake-utils";
-    scater-flake.url = "github:artur-sannikov/scater/nix-flakes";
   };
   outputs =
     {
       self,
       nixpkgs,
       flake-utils,
-      scater-flake,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        overlays = [
-          (final: prev: {
-            rPackages = prev.rPackages // {
-              # Force scater to be the bleeding-edge version
-              scater = scater-flake.packages.${system}.default;
-            };
-          })
-        ];
         pkgs = import nixpkgs {
-          inherit system overlays;
+          inherit system;
         };
         mia = pkgs.rPackages.buildRPackage {
           name = "mia";
