@@ -23,7 +23,7 @@ by default."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mia</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.15.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.17.0</span>
       </span>
     </div>
 
@@ -117,6 +117,8 @@ calculate. (Default: <code>"bray"</code>)</p></dd>
 (Default: <code>min(rowSums2(x))</code>)</p></li>
 <li><p><code>dis.fun</code>: <code>Character scalar</code>. Specifies the dissimilarity
 function to be used.</p></li>
+<li><p><code>transf</code>: <code>Function</code>. Specifies the optional
+transformation applied before calculating the dissimilarity matrix.</p></li>
 <li><p><code>tree.name</code>: (Unifrac)  <code>Character scalar</code>. Specifies the
 name of the tree from <code>rowTree(x)</code> that is used in calculation.
 Disabled when <code>tree</code> is specified. (Default: <code>"phylo"</code>)</p></li>
@@ -143,6 +145,10 @@ Specifies whether the calculation should be parallelized.</p></li>
 Defines detection threshold for absence/presence of features. Feature that
 has abundance under threshold in either of samples, will be discarded when
 evaluating overlap between samples. (Default: <code>0</code>)</p></li>
+<li><p><code>binary</code>: <code>Logical scalar</code>. Whether to perform
+presence/absence transformation before dissimilarity calculation. For
+Jaccard index the default is <code>TRUE</code>. For other dissimilarity metrics,
+please see <code><a href="https://rdrr.io/pkg/vegan/man/vegdist.html" class="external-link">vegdist</a></code>.</p></li>
 </ul></dd>
 
 
@@ -152,13 +158,14 @@ in metadata of the output. (Default: <code>method</code>)</p></dd>
 
 
 <dt id="arg-assay-type">assay.type<a class="anchor" aria-label="anchor" href="#arg-assay-type"></a></dt>
-<dd><p><code>Character scalar</code>. Specifies which assay to use for
-calculation. (Default: <code>"counts"</code>)</p></dd>
+<dd><p><code>Character scalar</code>. Specifies the name of assay
+used in calculation. (Default: <code>"counts"</code>)</p></dd>
 
 
 <dt id="arg-niter">niter<a class="anchor" aria-label="anchor" href="#arg-niter"></a></dt>
-<dd><p>The number of iterations performed. If <code>NULL</code>,
-rarefaction is disabled. (Default: <code>NULL</code>)</p></dd>
+<dd><p><code>Integer scalar</code>. Specifies the number of
+rarefaction rounds. Rarefaction is not applied when <code>niter=NULL</code>
+(see Details section). (Default: <code>NULL</code>)</p></dd>
 
 
 <dt id="arg-transposed">transposed<a class="anchor" aria-label="anchor" href="#arg-transposed"></a></dt>
@@ -182,10 +189,16 @@ that samples have completely different relative abundances.</p>
 <p>Unifrac is calculated with <code><a href="https://cmmr.github.io/rbiom/reference/rbiom-deprecated.html" class="external-link">rbiom:unifrac()</a></code>.</p>
 <p>If rarefaction is enabled, <code><a href="https://rdrr.io/pkg/vegan/man/avgdist.html" class="external-link">vegan:avgdist()</a></code> is
 utilized.</p>
-<p>For JSD implementation:
-Susan Holmes <a href="mailto:susan@stat.stanford.edu">susan@stat.stanford.edu</a>.
-Adapted for phyloseq by Paul J. McMurdie.
-Adapted for mia by Felix G.M. Ernst</p>
+<p>Rarefaction can be used to control uneven sequencing depths. Although,
+it is highly debated method. Some think that it is the only option that
+successfully controls the variation caused by uneven sampling depths.
+The biggest argument against rarefaction is the fact that it omits data.</p>
+<p>Rarefaction works by sampling the counts randomly. This random sampling
+is done <code>niter</code> times. In each sampling iteration, <code>sample</code> number
+of random samples are drawn, and dissimilarity is calculated for this
+subset. After the iterative process, there are <code>niter</code> number of
+result that are then averaged to get the final result.</p>
+<p>Refer to Schloss (2024) for more details on rarefaction.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -204,6 +217,10 @@ Jensen-Shannon Divergence and Hilbert space embedding.
 Bent Fuglede and Flemming Topsoe University of Copenhagen,
 Department of Mathematics
 <a href="http://www.math.ku.dk/~topsoe/ISIT2004JSD.pdf" class="external-link">http://www.math.ku.dk/~topsoe/ISIT2004JSD.pdf</a></p>
+<p>For rarefaction:
+Schloss PD (2024) Rarefaction is currently the best approach to control for
+uneven sequencing effort in amplicon sequence analyses. <em>mSphere</em>
+28;9(2):e0035423. doi: 10.1128/msphere.00354-23</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -244,15 +261,20 @@ Department of Mathematics
 <span class="r-out co"><span class="r-pr">#&gt;</span> M31Plmr 0.6713074 0.6620168 0.6649845 0.6720375 0.6831013 0.0000000</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Multi Dimensional Scaling applied to JSD dissimilarity matrix</span></span></span>
-<span class="r-in"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html" class="external-link">runMDS</a></span><span class="op">(</span><span class="va">tse</span>, FUN <span class="op">=</span> <span class="va">getDissimilarity</span>, method <span class="op">=</span> <span class="st">"overlap"</span>, </span></span>
-<span class="r-in"><span>              assay.type <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[[</span><span class="st">"MDS"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-in"><span>              </span></span>
+<span class="r-in"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="addMDS.html">addMDS</a></span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"overlap"</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                [,1]      [,2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CL3      -43284.813 -45143.87</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CC1       -4790.904 -40203.23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SV1       26147.150 -15952.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Fcsw -133864.366 -14824.29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M11Fcsw  610755.430 803373.51</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Plmr  -78217.650   3434.70</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">### Unifrac dissimilarity</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">getDissimilarity</span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"unifrac"</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 26 26</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu">addDissimilarity</span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"unifrac"</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -264,6 +286,37 @@ Department of Mathematics
 <span class="r-out co"><span class="r-pr">#&gt;</span> M31Fcsw 0.8567702 0.8543620 0.8433292 0.0000000 0.3350245 0.7913482</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> M11Fcsw 0.8661073 0.8633159 0.8466807 0.3350245 0.0000000 0.8579621</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> M31Plmr 0.5892417 0.5846985 0.6006535 0.7913482 0.8579621 0.0000000</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">### Bray dissimilarity</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Bray is usually applied to relative abundances so we have to apply</span></span></span>
+<span class="r-in"><span><span class="co"># transformation first</span></span></span>
+<span class="r-in"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">getDissimilarity</span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"bray"</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               CL3       CC1       SV1   M31Fcsw   M11Fcsw   M31Plmr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CL3     0.0000000 0.5902949 0.8438458 0.9947506 0.9948792 0.9844500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CC1     0.5902949 0.0000000 0.7835588 0.9969718 0.9972773 0.9765050</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SV1     0.8438458 0.7835588 0.0000000 0.9961894 0.9963561 0.9815678</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Fcsw 0.9947506 0.9969718 0.9961894 0.0000000 0.5468973 0.9874252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M11Fcsw 0.9948792 0.9972773 0.9963561 0.5468973 0.0000000 0.9955337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Plmr 0.9844500 0.9765050 0.9815678 0.9874252 0.9955337 0.0000000</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If applying rarefaction, the input must be count matrix and transformation</span></span></span>
+<span class="r-in"><span><span class="co"># method specified in function call (Note: increase niter)</span></span></span>
+<span class="r-in"><span><span class="va">rclr</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/decostand.html" class="external-link">decostand</a></span><span class="op">(</span><span class="va">x</span>, method<span class="op">=</span><span class="st">"rclr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">getDissimilarity</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">tse</span>, method <span class="op">=</span> <span class="st">"euclidean"</span>, transf <span class="op">=</span> <span class="va">rclr</span>, niter <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               CL3       CC1       SV1   M31Fcsw  M11Fcsw   M31Plmr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CL3       0.00000  92.41533 111.91988 100.26503 96.37790 104.02765</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CC1      92.41533   0.00000 107.63145 101.04726 96.98399 105.23199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SV1     111.91988 107.63145   0.00000  97.99801 94.11056 102.95526</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Fcsw 100.26503 101.04726  97.99801   0.00000 53.73290  80.20711</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M11Fcsw  96.37790  96.98399  94.11056  53.73290  0.00000  75.98772</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> M31Plmr 104.02765 105.23199 102.95526  80.20711 75.98772   0.00000</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

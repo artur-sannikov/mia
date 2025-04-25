@@ -19,7 +19,7 @@ reducedDims and are available for all the expected functions."><!-- mathjax --><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mia</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.15.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.17.0</span>
       </span>
     </div>
 
@@ -140,8 +140,8 @@ cells in rows. (Default: <code>FALSE</code>)</p></dd>
 
 
 <dt id="arg-assay-type">assay.type<a class="anchor" aria-label="anchor" href="#arg-assay-type"></a></dt>
-<dd><p><code>Character scalar</code>. Specifies which assay to use for
-calculation. (Default: <code>"counts"</code>)</p></dd>
+<dd><p><code>Character scalar</code>. Specifies the name of assay
+used in calculation. (Default: <code>"counts"</code>)</p></dd>
 
 
 <dt id="arg-assay-name">assay_name<a class="anchor" aria-label="anchor" href="#arg-assay-name"></a></dt>
@@ -181,8 +181,9 @@ columns</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>For <code>addDPCoA</code> a <a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-class.html" class="external-link">TreeSummarizedExperiment</a> containing the
-expression values as well as a <code>rowTree</code> to calculate <code>y</code> using
+    <p>For <code>addDPCoA</code> a
+<code><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-constructor.html" class="external-link">TreeSummarizedExperiment</a></code> containing
+the expression values as well as a <code>rowTree</code> to calculate <code>y</code> using
 <code><a href="https://rdrr.io/pkg/ape/man/cophenetic.phylo.html" class="external-link">cophenetic.phylo</a></code>.</p>
 <p>In addition to the reduced dimension on the features, the reduced dimension
 for samples are returned as well as <code>sample_red</code> attribute.
