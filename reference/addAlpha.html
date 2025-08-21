@@ -18,7 +18,7 @@ rarefaction."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mia</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.17.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.17.8</span>
       </span>
     </div>
 
@@ -186,12 +186,12 @@ and prune the tree to match features so that each tip can be found from
 the features. Other option is to remove all features that are not tips.
 (See <code>only.tips</code> parameter)</p></li>
 <li><p>'fisher': Fisher's alpha; as implemented in
-<code><a href="https://rdrr.io/pkg/vegan/man/diversity.html" class="external-link">vegan::fisher.alpha</a></code>. (Fisher et al. 1943)</p></li>
+<code><a href="https://vegandevs.github.io/vegan/reference/diversity.html" class="external-link">vegan::fisher.alpha</a></code>. (Fisher et al. 1943)</p></li>
 <li><p>'gini_simpson': Gini-Simpson diversity i.e. \(1 - lambda\),
 where \(lambda\) is the
 Simpson index, calculated as the sum of squared relative abundances.
 This corresponds to the diversity index
-'simpson' in <code><a href="https://rdrr.io/pkg/vegan/man/diversity.html" class="external-link">vegan::diversity</a></code>.
+'simpson' in <code><a href="https://vegandevs.github.io/vegan/reference/diversity.html" class="external-link">vegan::diversity</a></code>.
 This is also called Gibbs–Martin, or Blau index in sociology,
 psychology and management studies. The Gini-Simpson index (1-lambda)
 should not be
@@ -341,18 +341,18 @@ based on the assumption that the abundant species are observed regardless
 of their
 exact abundance. We use here the bias-corrected version
 (O'Hara 2005, Chiu et al. 2014) implemented in
-<code><a href="https://rdrr.io/pkg/vegan/man/specpool.html" class="external-link">estimateR</a></code>.
-For an exact formulation, see <code><a href="https://rdrr.io/pkg/vegan/man/specpool.html" class="external-link">estimateR</a></code>.
+<code><a href="https://vegandevs.github.io/vegan/reference/specpool.html" class="external-link">estimateR</a></code>.
+For an exact formulation, see <code><a href="https://vegandevs.github.io/vegan/reference/specpool.html" class="external-link">estimateR</a></code>.
 Note that this index comes with an additional column with standard
 error information.</p></li>
 <li><p>'chao1': This is a nonparametric estimator of species richness. It
 assumes that rare species carry information about the (unknown) number
 of unobserved species. We use here the bias-corrected version
 (O'Hara 2005, Chiu et al. 2014) implemented in
-<code><a href="https://rdrr.io/pkg/vegan/man/specpool.html" class="external-link">estimateR</a></code>. This index implicitly
+<code><a href="https://vegandevs.github.io/vegan/reference/specpool.html" class="external-link">estimateR</a></code>. This index implicitly
 assumes that every taxa has equal probability of being observed. Note
 that it gives a lower bound to species richness. The bias-corrected
-for an exact formulation, see <code><a href="https://rdrr.io/pkg/vegan/man/specpool.html" class="external-link">estimateR</a></code>.
+for an exact formulation, see <code><a href="https://vegandevs.github.io/vegan/reference/specpool.html" class="external-link">estimateR</a></code>.
 This estimator uses only the singleton and doubleton counts, and
 hence it gives more weight to the low abundance species.
 Note that this index comes with an additional column with standard
@@ -467,8 +467,8 @@ species richness, species diversity and the ‘Shannon–Wiener’ Index.
     <h2>See also</h2>
     <div class="dont-index">
 <ul><li><p><code><a href="https://rdrr.io/pkg/scater/man/plotColData.html" class="external-link">plotColData</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/pkg/vegan/man/specpool.html" class="external-link">estimateR</a></code></p></li>
-<li><p><code><a href="https://rdrr.io/pkg/vegan/man/diversity.html" class="external-link">diversity</a></code></p></li>
+<li><p><code><a href="https://vegandevs.github.io/vegan/reference/specpool.html" class="external-link">estimateR</a></code></p></li>
+<li><p><code><a href="https://vegandevs.github.io/vegan/reference/diversity.html" class="external-link">diversity</a></code></p></li>
 </ul></div>
     </div>
 
@@ -497,8 +497,8 @@ species richness, species diversity and the ‘Shannon–Wiener’ Index.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Shows the estimated observed richness</span></span></span>
 <span class="r-in"><span><span class="va">tse</span><span class="op">$</span><span class="va">observed_richness</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 3526 3843 2818  772  608 1336 2258 1772  551 1577  798  902 2240 2071 2218</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16]  980 1217  851 2995 2124 2466  879  709  900  736  650</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 3519 3823 2862  728  599 1315 2246 1774  543 1590  793  914 2261 2019 2244</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] 1001 1145  867 2995 2091 2470  841  690  885  700  646</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># One can also calculate the indices and get the results without adding</span></span></span>
 <span class="r-in"><span><span class="co"># them to colData</span></span></span>
